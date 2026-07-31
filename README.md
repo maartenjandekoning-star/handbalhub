@@ -1,13 +1,14 @@
-# HandbalNL Nieuws 3.0
+# HandbalHub 4.0
 
-Upload alle bestanden naar de hoofdmap van GitHub. Netlify publiceert automatisch.
+Upload deze bestanden naar de hoofdmap van je bestaande GitHub-repository:
 
-## Nieuw
-- Nieuw eigen HandbalNL-handbalicoon
-- Home, Nieuws, Competities, Live en Mijn handbal
-- Mijn handbalweekend
-- Slim dagoverzicht
-- Trending artikelen
-- Favoriete club en persoonlijke nieuwsselectie
-- Alleen nieuws van de afgelopen zeven dagen
-- Opgeslagen artikelen en bronstatus
+- index.html
+- manifest.webmanifest
+- service-worker.js
+- icon-192.png
+- icon-512.png
+
+Netlify publiceert daarna automatisch dezelfde URL.
+
+## Belangrijk
+De app probeert openbare feeds via een externe CORS-leesroute op te halen. Wanneer een bron tijdelijk niet beschikbaar is, toont de app recente fallbackberichten en eerder lokaal opgeslagen nieuws. Volledige artikelen openen altijd bij de oorspronkelijke bron.
