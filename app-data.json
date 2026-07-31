@@ -1,0 +1,45 @@
+{
+  "updatedAt": "2026-08-01T00:00:00+02:00",
+  "catalog": [
+    {
+      "id": "helius-h1",
+      "club": "Helius",
+      "team": "Heren 1",
+      "competition": "Hoofdklasse C"
+    },
+    {
+      "id": "quintus-d1",
+      "club": "Quintus",
+      "team": "Dames 1",
+      "competition": "Eredivisie Dames"
+    },
+    {
+      "id": "teamnl-dames",
+      "club": "TeamNL",
+      "team": "Dames",
+      "competition": "Internationaal"
+    },
+    {
+      "id": "aalsmeer-h1",
+      "club": "Aalsmeer",
+      "team": "Heren 1",
+      "competition": "SHL Men"
+    },
+    {
+      "id": "volendam-h1",
+      "club": "Volendam",
+      "team": "Heren 1",
+      "competition": "SHL Men"
+    }
+  ],
+  "teams": {},
+  "news": [],
+  "social": [],
+  "live": [
+    {
+      "title": "Super Handball League TV",
+      "source": "SHL TV",
+      "url": "https://superhandballeague.tv/live"
+    }
+  ]
+}
