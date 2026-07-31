@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#061d3a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>HandbalHub</title>
+<title>HandbalHub 4.1</title>
 <style>
 :root{--navy:#061d3a;--navy2:#0b3765;--blue:#0f4d82;--orange:#ff542a;--bg:#eef3f8;--card:#fff;--text:#10203b;--muted:#71809a;--line:#dce4ed;--shadow:0 10px 28px rgba(4,29,58,.12);--radius:24px}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;color:var(--text)}
@@ -56,7 +56,7 @@ main{padding:18px}.section{margin-top:18px}.card{background:var(--card);border-r
   </div>
   <div class="section grid-bottom">
     <div class="card mini stand"><h3>Mijn competitie</h3><div id="competitionHome" class="empty">Sla bij ‘Mijn handbal’ een directe competitielink op.</div></div>
-    <div class="card mini"><h3>Trending</h3><div id="trending"></div></div>
+    <div class="card mini"><h3>Social radar</h3><div id="socialRadar"></div><p class="meta" style="margin-top:12px">Onderwerpen worden afgeleid uit recente nieuwsbronnen. Met één tik bekijk je de actuele gesprekken op sociale platforms.</p></div>
     <div class="card mini"><h3>Nieuwste video</h3><div class="video-thumb">▶ Bekijk de nieuwste handbalvideo’s</div><p><a class="read" href="https://www.youtube.com/results?search_query=nederlands+handbal" target="_blank">Open YouTube →</a></p></div>
   </div>
   <div class="section">
@@ -75,9 +75,11 @@ main{padding:18px}.section{margin-top:18px}.card{background:var(--card);border-r
 <section id="competitions" class="view">
   <div class="pagehead"><h2>Competities</h2><p>Programma, uitslagen en standen via officiële kanalen.</p></div>
   <div class="card panel">
-    <h3>HandbalNL</h3><p>Voor actuele wedstrijden, uitslagen en standen is de officiële HandbalNL-app het betrouwbaarst.</p>
-    <a class="btn" href="https://apps.apple.com/nl/app/handbalnl/id1272156836" target="_blank">Open in App Store</a>
-    <a class="btn secondary" href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">Open Handbal.nl</a>
+    <h3>HandbalNL</h3>
+    <p>De officiële HandbalNL-app bevat programma’s, uitslagen, standen en favoriete teams. Een rechtstreekse app-deeplink is niet publiek beschikbaar; daarom bieden we drie betrouwbare routes.</p>
+    <a class="btn" href="https://handbal.nl/ontdek-nhv/ons-bestuur/handbalnlapp/" target="_blank">HandbalNL-informatie</a>
+    <a class="btn secondary" href="https://apps.apple.com/nl/app/handbalnl/id1272156836" target="_blank">Bekijk in App Store</a>
+    <a class="btn secondary" href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">Programma en standen</a>
   </div>
   <div class="card panel section"><h3>Mijn favoriete competitie</h3><input class="input" id="compName" placeholder="Naam, bijvoorbeeld SHL Men"><input class="input" style="margin-top:10px" id="compUrl" placeholder="Plak de directe competitielink"><button class="btn" style="margin-top:10px" onclick="saveCompetition()">Opslaan</button><div id="compSaved" style="margin-top:14px"></div></div>
 </section>
@@ -108,11 +110,11 @@ main{padding:18px}.section{margin-top:18px}.card{background:var(--card);border-r
 <script>
 const FALLBACK = [
 {title:"Roozendaal keert terug in de eredivisie: ‘Begon toch weer te kriebelen’",source:"Handbal Inside",date:"2026-07-31T18:00:00",category:"Transfers",url:"https://www.handbalinside.nl/",summary:"Rechterhoekspeelster Amber Roozendaal keert terug in de eredivisie.",image:""},
-{title:"Programma, uitslagen en standen WK U18 meisjes in Roemenië",source:"Handbal Startpunt",date:"2026-07-31T14:00:00",category:"TeamNL",url:"https://www.handbalstartpunt.nl/",summary:"Alles over het WK U18 en de wedstrijden van Oranje.",image:""},
+{title:"Programma, uitslagen en standen WK U18 meisjes in Roemenië",source:"Handbal Startpunt",date:"2026-07-31T14:00:00",category:"TeamNL",url:"https://www.handbalstartpunt.nl/nieuws/",summary:"Alles over het WK U18 en de wedstrijden van Oranje.",image:""},
 {title:"TeamNL maakt nieuwe selectie bekend",source:"Handbal.nl",date:"2026-07-31T12:00:00",category:"TeamNL",url:"https://handbal.nl/nieuws/",summary:"De nieuwe selectie en het programma van TeamNL zijn gepubliceerd.",image:""},
 {title:"Transferoverzicht SHL opnieuw bijgewerkt",source:"Super Handball League",date:"2026-07-30T10:00:00",category:"SHL",url:"https://superhandballeague.com/",summary:"De selecties van de clubs krijgen steeds meer vorm.",image:""},
 {title:"Regionaal handbalnieuws uit Oost-Nederland",source:"HandbalOost",date:"2026-07-29T11:00:00",category:"Verenigingen",url:"https://handbaloost.nl/",summary:"Nieuws en ontwikkelingen bij clubs in Oost-Nederland.",image:""},
-{title:"Helius bereidt zich voor op het nieuwe seizoen",source:"Groot Hellevoet",date:"2026-07-28T09:00:00",category:"Verenigingen",url:"https://www.groothellevoet.nl/",summary:"Lokaal nieuws rond Helius en het handbal in Hellevoetsluis.",image:""}
+{title:"Helius bereidt zich voor op het nieuwe seizoen",source:"Groot Hellevoet",date:"2026-07-28T09:00:00",category:"Verenigingen",url:"https://www.groothellevoet.nl/nieuws/actueel/",summary:"Lokaal nieuws rond Helius en het handbal in Hellevoetsluis.",image:""}
 ];
 const SOURCES = [
 {name:"Handbal Inside",feeds:["https://www.handbalinside.nl/feed/"]},
@@ -128,6 +130,22 @@ const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return (
 const abs=(u,b)=>{try{return new URL(u,b).href}catch{return u||""}};
 function category(t){t=t.toLowerCase();if(/teamnl|oranje|wk|ek|international/.test(t))return"TeamNL";if(/transfer|contract|versterk|keert terug/.test(t))return"Transfers";if(/super handball|shl|eredivisie/.test(t))return"SHL";if(/beach/.test(t))return"Beach";return"Nieuws"}
 function proxy(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
+
+async function enrichImages(list){
+ const targets=list.filter(a=>!a.image&&a.url).slice(0,10);
+ await Promise.all(targets.map(async a=>{
+  try{
+   const r=await fetch(proxy(a.url),{cache:"force-cache"}); if(!r.ok)return;
+   const txt=await r.text(); const doc=new DOMParser().parseFromString(txt,"text/html");
+   const img=doc.querySelector('meta[property="og:image"]')?.content||doc.querySelector('meta[name="twitter:image"]')?.content||doc.querySelector("article img,main img")?.src||"";
+   if(img)a.image=abs(img,a.url);
+   const desc=doc.querySelector('meta[property="og:description"]')?.content||doc.querySelector('meta[name="description"]')?.content||"";
+   if(desc&&(!a.summary||a.summary.length<60))a.summary=strip(desc).slice(0,260);
+  }catch(e){}
+ }));
+ return list;
+}
+
 async function loadSource(src){
  for(const feed of src.feeds){
   try{
@@ -149,7 +167,7 @@ async function loadSource(src){
       return {title,source:src.name,date:n.querySelector("time")?.getAttribute("datetime")||n.querySelector("time")?.textContent||new Date().toISOString(),category:category(title),url:abs(a?.getAttribute("href"),feed),summary:strip(n.querySelector("p")?.textContent).slice(0,220),image:abs(n.querySelector("img")?.getAttribute("src"),feed)}
     }).filter(Boolean);
    }
-   if(list.length) return list;
+   if(list.length) return await enrichImages(list);
   }catch(e){}
  }
  return [];
@@ -164,22 +182,51 @@ async function loadNews(){
 }
 function articleCard(a){
  const saved=(JSON.parse(localStorage.getItem("hh_saved")||"[]")).includes(a.url);
- return `<article class="card article"><div class="article-img">${a.image?`<img src="${a.image}" onerror="this.remove()">`:""}<span>${a.source}</span></div><div class="article-body"><div class="article-meta">${a.source} · ${new Date(a.date).toLocaleDateString("nl-NL",{day:"numeric",month:"short"})} · ${a.category}</div><h3>${a.title}</h3><p>${a.summary||"Lees het volledige bericht bij de oorspronkelijke bron."}</p><div class="article-actions"><a class="read" href="${a.url}" target="_blank">Lees bij de bron →</a><button class="save" onclick='toggleSave(${JSON.stringify(a.url)})'>${saved?"♥":"♡"}</button></div></div></article>`
+ return `<article class="card article"><div class="article-img">${a.image?`<img src="${a.image}" onerror="this.remove()">`:""}<span>${a.source}</span></div><div class="article-body"><div class="article-meta">${a.source} · ${new Date(a.date).toLocaleDateString("nl-NL",{day:"numeric",month:"short"})} · ${a.category}</div><h3>${a.title}</h3><p>${editorialSummary(a)}</p><div class="article-actions"><a class="read" href="${a.url}" target="_blank">Lees bij de bron →</a><button class="save" onclick='toggleSave(${JSON.stringify(a.url)})'>${saved?"♥":"♡"}</button></div></div></article>`
 }
 function renderAll(){
  $("#weekCount").textContent=articles.length;
  $("#homeNews").innerHTML=articles.slice(0,4).map(articleCard).join("")||'<div class="card empty">Nog geen recente berichten geladen.</div>';
- renderNews(); renderToday(); renderTrending(); renderForYou(); renderSaved(); renderCompetition();
+ renderNews(); renderToday(); renderSocialRadar(); renderForYou(); renderSaved(); renderCompetition();
+}
+function editorialSummary(a){
+ const title=a.title.replace(/\s+/g," ").trim();
+ const raw=(a.summary||"").replace(/\s+/g," ").trim();
+ const lower=(title+" "+raw).toLowerCase();
+ let lead="";
+ if(/transfer|contract|keert terug|versterk/.test(lower)) lead="Op de transfermarkt is er beweging: ";
+ else if(/teamnl|oranje|wk|ek|international/.test(lower)) lead="Bij TeamNL en de Nederlandse selecties speelt het volgende: ";
+ else if(/programma|wedstrijdschema|beker|competitie/.test(lower)) lead="Voor de competities is een nieuwe update beschikbaar: ";
+ else if(/wint|winst|verslaat|uitslag/.test(lower)) lead="Sportief nieuws: ";
+ else if(/live|stream|video/.test(lower)) lead="Om te bekijken: ";
+ const base=raw&&raw.toLowerCase()!==title.toLowerCase()?raw:title;
+ let text=lead+base;
+ if(text.length>260) text=text.slice(0,257).replace(/\s+\S*$/,"")+"…";
+ if(!/[.!?…]$/.test(text)) text+=".";
+ return text;
 }
 function renderToday(){
- const picked=[]; for(const re of [/teamnl|oranje|wk|ek/i,/programma|uitslag|wedstrijd|beker/i,/transfer|contract|versterk/i,/shl|super handball|live/i]){const x=articles.find(a=>re.test(a.title+" "+a.category)&&!picked.includes(a));if(x)picked.push(x)}
+ const picked=[];
+ for(const re of [/teamnl|oranje|wk|ek/i,/programma|uitslag|wedstrijd|beker/i,/transfer|contract|versterk/i,/shl|super handball|live/i]){
+  const x=articles.find(a=>re.test(a.title+" "+a.category)&&!picked.includes(a));if(x)picked.push(x)
+ }
  for(const a of articles){if(picked.length>=4)break;if(!picked.includes(a))picked.push(a)}
  const emojis=["🇳🇱","🏆","🔁","📺"];
- $("#todayList").innerHTML=picked.slice(0,4).map((a,i)=>`<li onclick="window.open('${a.url}','_blank')"><span class="emoji">${emojis[i]}</span><div><strong>${a.title}</strong><div class="src">${a.source}</div></div><span class="arrow">›</span></li>`).join("");
+ $("#todayList").innerHTML=picked.slice(0,4).map((a,i)=>`<li><span class="emoji">${emojis[i]}</span><div><strong>${a.title}</strong><div style="margin-top:7px;line-height:1.45;color:#41536d">${editorialSummary(a)}</div><div class="src">Samenvatting op basis van ${a.source}</div><a class="read" href="${a.url}" target="_blank" style="display:inline-block;margin-top:7px">Bron bekijken →</a></div><span class="arrow">›</span></li>`).join("");
 }
-function renderTrending(){
- const terms=["TeamNL","SHL","transfer","jeugd","beach","beker"]; const counts=terms.map(t=>[t,articles.filter(a=>(a.title+" "+a.category).toLowerCase().includes(t.toLowerCase())).length]).sort((a,b)=>b[1]-a[1]).slice(0,5);
- $("#trending").innerHTML=counts.map(([t,c])=>`<div class="trend-item">🔥 <b>${t}</b> <span class="meta">· ${c}</span></div>`).join("");
+function socialSearchUrl(platform,term){
+ const q=encodeURIComponent(term+" handbal");
+ if(platform==="YouTube") return "https://www.youtube.com/results?search_query="+q;
+ if(platform==="Instagram") return "https://www.instagram.com/explore/search/keyword/?q="+q;
+ if(platform==="TikTok") return "https://www.tiktok.com/search?q="+q;
+ return "https://x.com/search?q="+q+"&src=typed_query&f=live";
+}
+function renderSocialRadar(){
+ const candidates=["TeamNL","SHL","transfer","jeugd","beach","beker","Aalsmeer","Volendam","Quintus"];
+ const ranked=candidates.map(t=>({t,c:articles.filter(a=>(a.title+" "+a.summary+" "+a.category).toLowerCase().includes(t.toLowerCase())).length}))
+   .filter(x=>x.c>0).sort((a,b)=>b.c-a.c).slice(0,4);
+ const list=ranked.length?ranked:[{t:"Nederlands handbal",c:articles.length}];
+ $("#socialRadar").innerHTML=list.map(({t,c})=>`<div class="trend-item"><div><b>🔥 ${t}</b> <span class="meta">· ${c} recente vermelding${c===1?"":"en"}</span></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><a class="read" href="${socialSearchUrl("YouTube",t)}" target="_blank">YouTube</a><a class="read" href="${socialSearchUrl("Instagram",t)}" target="_blank">Instagram</a><a class="read" href="${socialSearchUrl("TikTok",t)}" target="_blank">TikTok</a><a class="read" href="${socialSearchUrl("X",t)}" target="_blank">X</a></div></div>`).join("");
 }
 function renderNews(){
  const q=($("#search")?.value||"").toLowerCase();

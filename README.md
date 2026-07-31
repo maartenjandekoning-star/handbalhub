@@ -1,14 +1,17 @@
-# HandbalHub 4.0
+# HandbalHub 4.1
 
-Upload deze bestanden naar de hoofdmap van je bestaande GitHub-repository:
+Verbeteringen:
+- artikelbeelden worden ook uit Open Graph-metadata gehaald;
+- 'Vandaag in het handbal' bevat zelfstandig leesbare, automatisch herschreven samenvattingen;
+- Social radar vervangt de weinig bruikbare trendinglijst;
+- Social radar linkt direct naar actuele zoekresultaten op YouTube, Instagram, TikTok en X;
+- betrouwbaardere HandbalNL-routes;
+- alleen nieuws van de afgelopen zeven dagen.
 
+Upload naar de hoofdmap van GitHub:
 - index.html
 - manifest.webmanifest
 - service-worker.js
 - icon-192.png
 - icon-512.png
-
-Netlify publiceert daarna automatisch dezelfde URL.
-
-## Belangrijk
-De app probeert openbare feeds via een externe CORS-leesroute op te halen. Wanneer een bron tijdelijk niet beschikbaar is, toont de app recente fallbackberichten en eerder lokaal opgeslagen nieuws. Volledige artikelen openen altijd bij de oorspronkelijke bron.
+- README.md
