@@ -1,25 +1,19 @@
-# HandbalNieuws Nederland v5
+# HandbalNieuws Nederland v6
 
-Deze versie haalt nieuws automatisch op via een Netlify Function. Er is geen persoonlijke API-sleutel nodig.
+Deze versie is bewust geschikt gemaakt voor uploaden via een iPhone: alle bestanden staan in de hoofdmap.
 
-## Eenmalig uploaden
-Upload alle bestanden en mappen naar de hoofdmap van de GitHub-repository, inclusief:
+Upload of vervang in GitHub alle bestanden uit deze map:
 - index.html
+- news.js
 - netlify.toml
-- service-worker.js
 - manifest.webmanifest
-- icons/
-- netlify/functions/news.js
+- icon-192.png
+- icon-512.png
+- README.md
 
-Netlify detecteert `netlify.toml` automatisch en publiceert de serverfunctie mee.
+Netlify gebruikt `news.js` als serverfunctie doordat in `netlify.toml` de functiesmap op de hoofdmap staat. De app haalt bij het openen en via de vernieuwknop automatisch nieuws op.
 
-## Functies
-- automatisch nieuws ophalen van Handbal Inside, Handbal Startpunt, Handbal.nl, HandbalOost, Super Handball League en Groot Hellevoet;
-- directe links naar originele artikelen;
-- livestreamknop voor superhandballeague.tv;
-- uitslagen en standen via Handbal.nl;
-- eigen favoriete competitielink bewaren op de iPhone;
-- zoeken, bronfilters en artikelen opslaan;
-- offline terugvallen op laatst geladen nieuws.
+Test na publicatie:
+`https://JOUW-SITE.netlify.app/.netlify/functions/news`
 
-De app probeert eerst openbare RSS-feeds en gebruikt daarna beperkte uitlezing van openbare overzichtspagina's. Als een bron zijn site wijzigt, kan die bron tijdelijk geen berichten leveren; de overige bronnen blijven werken.
+Daar moet JSON zichtbaar zijn met `articles` en `sources`.

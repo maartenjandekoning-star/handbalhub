@@ -1,83 +1,22 @@
 const SOURCES = [
-  { name: 'Handbal Inside', key: 'handbalinside', base: 'https://www.handbalinside.nl', feeds: ['https://www.handbalinside.nl/feed/'] },
-  { name: 'Handbal Startpunt', key: 'handbalstartpunt', base: 'https://www.handbalstartpunt.nl', feeds: ['https://www.handbalstartpunt.nl/feed/'] },
-  { name: 'Handbal.nl', key: 'handbalnl', base: 'https://handbal.nl', feeds: ['https://handbal.nl/feed/'] },
-  { name: 'HandbalOost', key: 'handbaloost', base: 'https://handbaloost.nl', feeds: ['https://handbaloost.nl/feed/'] },
-  { name: 'Super Handball League', key: 'shl', base: 'https://superhandballeague.com', feeds: ['https://superhandballeague.com/feed/'] },
-  { name: 'Groot Hellevoet', key: 'groothellevoet', base: 'https://www.groothellevoet.nl', feeds: ['https://www.groothellevoet.nl/rss', 'https://www.groothellevoet.nl/feed/'] }
+  { name:'Handbal Inside', key:'handbalinside', base:'https://www.handbalinside.nl', feeds:['https://www.handbalinside.nl/feed/'], pages:['https://www.handbalinside.nl/'] },
+  { name:'Handbal Startpunt', key:'handbalstartpunt', base:'https://www.handbalstartpunt.nl', feeds:['https://www.handbalstartpunt.nl/feed/','https://www.handbalstartpunt.nl/rss/'], pages:['https://www.handbalstartpunt.nl/nieuws/','https://www.handbalstartpunt.nl/'] },
+  { name:'Handbal.nl', key:'handbalnl', base:'https://handbal.nl', feeds:['https://handbal.nl/feed/','https://handbal.nl/nieuws/feed/'], pages:['https://handbal.nl/nieuws/'] },
+  { name:'HandbalOost', key:'handbaloost', base:'https://www.handbaloost.nl', feeds:['https://www.handbaloost.nl/feed/'], pages:['https://www.handbaloost.nl/'] },
+  { name:'Super Handball League', key:'shl', base:'https://superhandballeague.com', feeds:['https://superhandballeague.com/feed/'], pages:['https://superhandballeague.com/'] },
+  { name:'Groot Hellevoet', key:'groothellevoet', base:'https://www.groothellevoet.nl', feeds:['https://www.groothellevoet.nl/rss','https://www.groothellevoet.nl/feed/'], pages:['https://www.groothellevoet.nl/nieuws/','https://www.groothellevoet.nl/'] }
 ];
-
-const decode = s => (s || '')
-  .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-  .replace(/<[^>]+>/g, ' ')
-  .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
-  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
-const first = (text, re) => (text.match(re) || [,''])[1] || '';
-const absolute = (url, base) => { try { return new URL(url, base).href; } catch { return base; } };
-const category = title => {
-  const t = title.toLowerCase();
-  if (/teamnl|oranje|nederland|wk|ek|ihf|ehf/.test(t)) return 'TeamNL';
-  if (/transfer|contract|versterkt|naar /.test(t)) return 'Transfers';
-  if (/beach/.test(t)) return 'Beach Handball';
-  if (/super handball|shl|eredivisie/.test(t)) return 'Super Handball League';
-  if (/jeugd|u17|u18|u19|u20|a-jeugd|b-jeugd|c-jeugd/.test(t)) return 'Jeugdhandbal';
-  if (/scheids|arbitrage|spelregel/.test(t)) return 'Arbitrage en spelregels';
-  if (/club|vereniging|helius/.test(t)) return 'Verenigingsnieuws';
-  return 'Algemeen';
-};
-function parseRss(xml, source) {
-  const blocks = [...xml.matchAll(/<(item|entry)\b[\s\S]*?<\/\1>/gi)].map(m => m[0]);
-  return blocks.slice(0, 15).map((b, i) => {
-    const title = decode(first(b, /<title[^>]*>([\s\S]*?)<\/title>/i));
-    const linkTag = first(b, /<link[^>]*>([\s\S]*?)<\/link>/i);
-    const linkHref = first(b, /<link[^>]+href=["']([^"']+)["']/i);
-    const url = absolute(decode(linkHref || linkTag), source.base);
-    const description = decode(first(b, /<(description|summary|content:encoded)[^>]*>([\s\S]*?)<\/\1>/i).split('>').pop());
-    const date = decode(first(b, /<(pubDate|published|updated)[^>]*>([\s\S]*?)<\/\1>/i).split('>').pop());
-    const image = first(b, /<(?:media:content|enclosure)[^>]+url=["']([^"']+)["']/i) || first(b, /<img[^>]+src=["']([^"']+)["']/i);
-    return { id: `${source.key}-${Buffer.from(url || title).toString('base64url').slice(0,24)}-${i}`, title, summary: description.slice(0, 220), source: source.name, sourceKey: source.key, date: date || new Date().toISOString(), category: category(title), url, image: image ? absolute(image, source.base) : '' };
-  }).filter(x => x.title && x.url);
-}
-function parseJsonLd(html, source) {
-  const out = [];
-  for (const m of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
-    try {
-      const raw = JSON.parse(m[1]);
-      const queue = Array.isArray(raw) ? raw : [raw];
-      for (const obj of queue) {
-        const list = obj?.itemListElement || (obj?.['@graph'] || []);
-        for (const entry of list) {
-          const item = entry?.item || entry;
-          const title = item?.headline || item?.name;
-          const url = item?.url || item?.mainEntityOfPage?.['@id'];
-          if (title && url) out.push({ id:`${source.key}-${Buffer.from(url).toString('base64url').slice(0,24)}`, title:decode(title), summary:decode(item.description||'').slice(0,220), source:source.name, sourceKey:source.key, date:item.datePublished||item.dateModified||new Date().toISOString(), category:category(title), url:absolute(url,source.base), image:Array.isArray(item.image)?item.image[0]:(item.image?.url||item.image||'') });
-        }
-      }
-    } catch {}
-  }
-  return out;
-}
-function parseLinks(html, source) {
-  const out=[]; const seen=new Set();
-  for (const m of html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
-    const url=absolute(m[1],source.base), title=decode(m[2]);
-    if (title.length<25 || title.length>180 || seen.has(url) || !url.startsWith(source.base)) continue;
-    if (/contact|privacy|login|agenda|stand|programma|home/i.test(title)) continue;
-    seen.add(url); out.push({id:`${source.key}-${Buffer.from(url).toString('base64url').slice(0,24)}`,title,summary:'Lees het volledige bericht bij de oorspronkelijke bron.',source:source.name,sourceKey:source.key,date:new Date().toISOString(),category:category(title),url,image:''});
-    if(out.length>=10) break;
-  }
-  return out;
-}
-async function fetchText(url) {
-  const r = await fetch(url,{headers:{'user-agent':'HandbalNieuwsNederland/1.0 (+news aggregator; links to original sources)','accept':'application/rss+xml,application/xml,text/xml,text/html;q=0.9,*/*;q=0.8'},signal:AbortSignal.timeout(12000)});
-  if(!r.ok) throw new Error(`${r.status}`); return {text:await r.text(),type:r.headers.get('content-type')||''};
-}
-async function sourceNews(source){
-  for(const feed of source.feeds){ try{const {text}=await fetchText(feed); const a=parseRss(text,source); if(a.length) return {articles:a,status:'rss'};}catch{} }
-  try{const {text}=await fetchText(source.base); const a=[...parseJsonLd(text,source),...parseLinks(text,source)]; const unique=[...new Map(a.map(x=>[x.url,x])).values()]; return {articles:unique.slice(0,12),status:'website'};}catch(e){return {articles:[],status:'unavailable'};}
-}
-exports.handler = async () => {
-  const results = await Promise.all(SOURCES.map(async s=>({source:s.name,...await sourceNews(s)})));
-  const articles=[...new Map(results.flatMap(r=>r.articles).map(a=>[a.url,a])).values()].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,60);
-  return {statusCode:200,headers:{'content-type':'application/json; charset=utf-8','access-control-allow-origin':'*'},body:JSON.stringify({updatedAt:new Date().toISOString(),articles,sources:results.map(r=>({source:r.source,status:r.status,count:r.articles.length}))})};
-};
+const entityMap={amp:'&',quot:'"',apos:"'",lt:'<',gt:'>',nbsp:' '};
+const decode=s=>(s||'').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&(#\d+|#x[0-9a-f]+|\w+);/gi,(_,e)=>{if(e[0]==='#'){const n=e[1].toLowerCase()==='x'?parseInt(e.slice(2),16):parseInt(e.slice(1),10);return Number.isFinite(n)?String.fromCodePoint(n):' '}return entityMap[e.toLowerCase()]||' '}).replace(/\s+/g,' ').trim();
+const first=(t,r)=>{const m=t.match(r);return m?(m[2]??m[1]??''):''};
+const absolute=(u,b)=>{try{return new URL(decode(u),b).href}catch{return b}};
+const slug=s=>(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);
+const classify=(title,summary='')=>{const t=(title+' '+summary).toLowerCase();if(/teamnl|oranje|nederlands team|wk|ek|ihf|ehf/.test(t))return'TeamNL';if(/transfer|contract|versterk|tekent|naar [a-z]/.test(t))return'Transfers';if(/beach/.test(t))return'Beach Handball';if(/super handball|\bshl\b|eredivisie/.test(t))return'Super Handball League';if(/jeugd|u1[6-9]|u20|a-jeugd|b-jeugd|c-jeugd/.test(t))return'Jeugdhandbal';if(/scheids|arbitrage|spelregel/.test(t))return'Arbitrage en spelregels';if(/opleiding|trainer|coach/.test(t))return'Opleidingen en trainers';if(/club|vereniging|helius|hellevoet/.test(t))return'Verenigingsnieuws';return'Algemeen'};
+const cleanDate=d=>{const x=new Date(d);return Number.isNaN(x.getTime())?new Date().toISOString():x.toISOString()};
+function article(source,{title,url,summary,date,image}){title=decode(title);url=absolute(url,source.base);summary=decode(summary).slice(0,260);if(!title||title.length<12||!/^https?:/.test(url))return null;return{id:`${source.key}-${slug(url)}-${slug(title).slice(0,20)}`,title,summary:summary||'Lees het volledige bericht bij de oorspronkelijke bron.',source:source.name,sourceKey:source.key,date:cleanDate(date),category:classify(title,summary),url,image:image?absolute(image,source.base):''}}
+function parseRss(xml,source){const blocks=[...xml.matchAll(/<(item|entry)\b[\s\S]*?<\/\1>/gi)].map(m=>m[0]);return blocks.slice(0,20).map(b=>{const title=first(b,/<title[^>]*>([\s\S]*?)<\/title>/i);const link=first(b,/<link[^>]+href=["']([^"']+)["']/i)||first(b,/<link[^>]*>([\s\S]*?)<\/link>/i)||first(b,/<guid[^>]*>([\s\S]*?)<\/guid>/i);const summary=first(b,/<(?:description|summary|content:encoded)[^>]*>([\s\S]*?)<\/(?:description|summary|content:encoded)>/i);const date=first(b,/<(?:pubDate|published|updated|dc:date)[^>]*>([\s\S]*?)<\/(?:pubDate|published|updated|dc:date)>/i);const image=first(b,/<(?:media:content|media:thumbnail|enclosure)[^>]+url=["']([^"']+)["']/i)||first(summary,/<img[^>]+src=["']([^"']+)["']/i);return article(source,{title,url:link,summary,date,image})}).filter(Boolean)}
+function parseJsonLd(html,source){const out=[];for(const m of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)){try{const root=JSON.parse(m[1]);const walk=x=>{if(!x)return;if(Array.isArray(x))return x.forEach(walk);if(typeof x!=='object')return;const type=String(x['@type']||'');if(/NewsArticle|Article|BlogPosting/i.test(type)){const a=article(source,{title:x.headline||x.name,url:x.url||x.mainEntityOfPage?.['@id']||x.mainEntityOfPage,summary:x.description,date:x.datePublished||x.dateModified,image:Array.isArray(x.image)?x.image[0]:(x.image?.url||x.image)});if(a)out.push(a)}Object.values(x).forEach(v=>{if(typeof v==='object')walk(v)})};walk(root)}catch{}}return out}
+function parseHtmlCards(html,source){const out=[];const seen=new Set();const patterns=[/<article\b[\s\S]*?<\/article>/gi,/<div\b[^>]*class=["'][^"']*(?:post|news|article|item)[^"']*["'][^>]*>[\s\S]*?<\/div>/gi];let chunks=[];for(const p of patterns)chunks.push(...(html.match(p)||[]));if(!chunks.length)chunks=[html];for(const block of chunks){const href=first(block,/<a\b[^>]*href=["']([^"'#]+)["']/i);const title=first(block,/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/i)||first(block,/<a\b[^>]*href=["'][^"']+["'][^>]*>([\s\S]*?)<\/a>/i);const summary=first(block,/<p[^>]*>([\s\S]*?)<\/p>/i);const date=first(block,/<time[^>]+datetime=["']([^"']+)["']/i)||first(block,/<time[^>]*>([\s\S]*?)<\/time>/i);const image=first(block,/<img[^>]+(?:data-src|src)=["']([^"']+)["']/i);const a=article(source,{title,url:href,summary,date,image});if(a&&!seen.has(a.url)&&a.url.startsWith(source.base)){seen.add(a.url);out.push(a)}if(out.length>=15)break}return out}
+async function fetchText(url){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);try{const r=await fetch(url,{headers:{'user-agent':'Mozilla/5.0 HandbalNieuwsNederland/2.0','accept':'application/rss+xml,application/xml,text/xml,text/html;q=0.9,*/*;q=0.8'},signal:controller.signal,redirect:'follow'});if(!r.ok)throw new Error(String(r.status));return await r.text()}finally{clearTimeout(timer)}}
+async function loadSource(source){for(const url of source.feeds){try{const text=await fetchText(url);const a=parseRss(text,source);if(a.length)return{articles:a,status:'RSS'}}catch{}}for(const url of source.pages){try{const text=await fetchText(url);const a=[...parseJsonLd(text,source),...parseHtmlCards(text,source)];const unique=[...new Map(a.map(x=>[x.url,x])).values()];if(unique.length)return{articles:unique.slice(0,15),status:'Website'}}catch{}}return{articles:[],status:'Niet bereikbaar'}}
+exports.handler=async()=>{const settled=await Promise.all(SOURCES.map(async source=>({source:source.name,...await loadSource(source)})));const articles=[...new Map(settled.flatMap(x=>x.articles).map(a=>[a.url,a])).values()].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,80);return{statusCode:200,headers:{'content-type':'application/json; charset=utf-8','access-control-allow-origin':'*','cache-control':'public, max-age=300, s-maxage=900'},body:JSON.stringify({updatedAt:new Date().toISOString(),articles,sources:settled.map(x=>({source:x.source,status:x.status,count:x.articles.length}))})}}
