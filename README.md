@@ -1,19 +1,12 @@
-# HandbalNieuws Nederland v6
+# HandbalNieuws Nederland v7 – statisch
 
-Deze versie is bewust geschikt gemaakt voor uploaden via een iPhone: alle bestanden staan in de hoofdmap.
+Deze versie gebruikt geen Netlify Functions en geen eigen API-sleutel. De app leest openbare RSS-feeds via openbare RSS-leesdiensten. Bij uitval toont de app de laatst geladen berichten of directe bronlinks.
 
-Upload of vervang in GitHub alle bestanden uit deze map:
+Upload deze vijf bestanden naar de hoofdmap van GitHub:
 - index.html
-- news.js
-- netlify.toml
 - manifest.webmanifest
+- service-worker.js
 - icon-192.png
 - icon-512.png
-- README.md
 
-Netlify gebruikt `news.js` als serverfunctie doordat in `netlify.toml` de functiesmap op de hoofdmap staat. De app haalt bij het openen en via de vernieuwknop automatisch nieuws op.
-
-Test na publicatie:
-`https://JOUW-SITE.netlify.app/.netlify/functions/news`
-
-Daar moet JSON zichtbaar zijn met `articles` en `sources`.
+Oude bestanden zoals news.js, netlify.toml, app.js en articles.json mogen worden verwijderd, maar hoeven de werking niet te blokkeren.
