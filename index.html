@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#071b3b" />
+  <meta name="theme-color" content="#071b33" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="HandbalNieuws" />
@@ -13,70 +13,82 @@
   <title>HandbalNieuws Nederland</title>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-row">
-        <div class="brand-mark" aria-hidden="true">H</div>
-        <div><strong>HandbalNieuws</strong><span>Nederland</span></div>
-        <button id="themeBtn" class="icon-btn" aria-label="Wissel thema">◐</button>
+  <header class="topbar">
+    <div class="brand-row">
+      <div class="brand-mark">HN</div>
+      <div>
+        <div class="brand-name">HandbalNieuws</div>
+        <div class="brand-sub">Nederland</div>
       </div>
-      <div class="search-row">
-        <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Zoek nieuws, club of competitie" /></label>
-        <button id="filterBtn" class="filter-btn" aria-label="Filters openen">Filters</button>
-      </div>
-      <p id="updatedAt" class="updated">Laatst bijgewerkt: —</p>
-      <div id="sourceLinks" class="source-links" aria-label="Direct naar nieuwsbronnen"></div>
-    </header>
-
-    <main id="main" class="content">
-      <section id="homeView" class="view active">
-        <div id="featured"></div>
-        <div class="section-head"><h2>Laatste nieuws</h2><span id="resultCount"></span></div>
-        <div id="newsList" class="news-list"></div>
-      </section>
-      <section id="forYouView" class="view"><div class="empty"><h2>Voor jou</h2><p>Kies in Instellingen je favoriete bronnen en categorieën.</p><div id="forYouList" class="news-list"></div></div></section>
-      <section id="categoriesView" class="view"><h2>Categorieën</h2><div id="categoryGrid" class="category-grid"></div></section>
-      <section id="savedView" class="view"><h2>Opgeslagen</h2><div id="savedList" class="news-list"></div></section>
-      <section id="settingsView" class="view">
-        <h2>Instellingen</h2>
-        <div class="settings-card"><h3>Weergave</h3><label><span>Toon afbeeldingen</span><input id="imagesToggle" type="checkbox" checked /></label><label><span>Donkere modus</span><input id="darkToggle" type="checkbox" /></label></div>
-        <div class="settings-card"><h3>Mijn bronnen</h3><div id="sourcePrefs"></div></div>
-        <div class="settings-card"><h3>Beheer</h3><button id="adminBtn" class="primary">Open bronnenbeheer</button></div>
-        <div class="settings-card"><h3>Over</h3><p>Deze prototype-app toont samenvattingen en verwijst altijd door naar de oorspronkelijke bron. Volledige artikelen worden niet overgenomen.</p></div>
-      </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Hoofdnavigatie">
-      <button data-view="homeView" class="active"><b>⌂</b><span>Home</span></button>
-      <button data-view="forYouView"><b>★</b><span>Voor jou</span></button>
-      <button data-view="categoriesView"><b>▦</b><span>Categorieën</span></button>
-      <button data-view="savedView"><b>♡</b><span>Opgeslagen</span></button>
-      <button data-view="settingsView"><b>⚙</b><span>Instellingen</span></button>
-    </nav>
-  </div>
-
-  <dialog id="filterDialog">
-    <form method="dialog" class="dialog-card">
-      <div class="dialog-head"><h2>Filters</h2><button value="cancel" aria-label="Sluiten">×</button></div>
-      <label>Bron<select id="sourceFilter"><option value="">Alle bronnen</option></select></label>
-      <label>Categorie<select id="categoryFilter"><option value="">Alle categorieën</option></select></label>
-      <label>Periode<select id="dateFilter"><option value="">Alle data</option><option value="1">Vandaag</option><option value="7">Afgelopen 7 dagen</option><option value="30">Afgelopen 30 dagen</option></select></label>
-      <label class="check"><input id="savedOnly" type="checkbox" /> Alleen opgeslagen</label>
-      <div class="dialog-actions"><button id="clearFilters" type="button">Wissen</button><button class="primary" value="apply">Toepassen</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="adminDialog">
-    <div class="dialog-card admin-card">
-      <div class="dialog-head"><h2>Bronnenbeheer</h2><button id="closeAdmin" aria-label="Sluiten">×</button></div>
-      <p class="muted">Prototype: feeds zijn centraal voorbereid. Vul uitsluitend bevestigde officiële RSS- of API-adressen in.</p>
-      <div id="adminSources"></div>
-      <button id="refreshBtn" class="primary wide">Nieuws handmatig bijwerken</button>
-      <div id="adminMessage" class="status"></div>
+      <button id="themeButton" class="icon-button" aria-label="Wissel thema">◐</button>
     </div>
-  </dialog>
+    <div class="search-row">
+      <label class="searchbox"><span>⌕</span><input id="searchInput" type="search" placeholder="Zoek in het handbalnieuws" /></label>
+      <button id="filterButton" class="filter-button">Filters</button>
+    </div>
+    <div class="update-row"><span class="live-dot"></span><span id="updatedText">Bijgewerkt: zojuist</span></div>
+  </header>
 
-  <div id="offlineBanner" class="offline">Je bent offline. Eerder geladen nieuws blijft beschikbaar.</div>
+  <main id="app" class="page">
+    <section id="filterPanel" class="filter-panel hidden" aria-label="Nieuwsfilters">
+      <div class="filter-head"><strong>Filter nieuws</strong><button id="resetFilters">Wissen</button></div>
+      <div id="sourceFilters" class="chip-row"></div>
+      <div id="categoryFilters" class="chip-row"></div>
+    </section>
+
+    <section id="homeView" class="view active">
+      <div id="hero"></div>
+      <div class="section-title-row"><h2>Laatste nieuws</h2><span id="resultCount"></span></div>
+      <div id="newsList" class="news-list"></div>
+    </section>
+
+    <section id="foryouView" class="view">
+      <div class="section-title-row"><h2>Voor jou</h2></div>
+      <p class="intro">Berichten uit jouw favoriete bronnen en categorieën.</p>
+      <div id="forYouList" class="news-list"></div>
+    </section>
+
+    <section id="categoriesView" class="view">
+      <div class="section-title-row"><h2>Categorieën</h2></div>
+      <div id="categoryGrid" class="category-grid"></div>
+    </section>
+
+    <section id="savedView" class="view">
+      <div class="section-title-row"><h2>Opgeslagen</h2></div>
+      <div id="savedList" class="news-list"></div>
+    </section>
+
+    <section id="settingsView" class="view">
+      <div class="section-title-row"><h2>Instellingen</h2></div>
+      <div class="settings-card">
+        <h3>Mijn bronnen</h3>
+        <div id="sourceSettings"></div>
+      </div>
+      <div class="settings-card">
+        <h3>Mijn categorieën</h3>
+        <div id="categorySettings"></div>
+      </div>
+      <div class="settings-card">
+        <h3>Weergave</h3>
+        <label class="switch-row"><span>Afbeeldingen tonen</span><input id="imagesToggle" type="checkbox" checked /></label>
+        <label class="switch-row"><span>Donkere modus</span><input id="darkToggle" type="checkbox" /></label>
+      </div>
+      <div class="settings-card">
+        <h3>Over deze versie</h3>
+        <p>Deze testversie toont echte actuele titels en verwijst altijd door naar de oorspronkelijke nieuwsbron. De berichten worden in deze versie nog handmatig bijgewerkt.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Hoofdnavigatie">
+    <button class="nav-item active" data-view="homeView"><span>⌂</span><small>Home</small></button>
+    <button class="nav-item" data-view="foryouView"><span>★</span><small>Voor jou</small></button>
+    <button class="nav-item" data-view="categoriesView"><span>▦</span><small>Categorieën</small></button>
+    <button class="nav-item" data-view="savedView"><span>♡</span><small>Opgeslagen</small></button>
+    <button class="nav-item" data-view="settingsView"><span>⚙</span><small>Instellingen</small></button>
+  </nav>
+
+  <div id="toast" class="toast" role="status"></div>
   <script src="app.js" defer></script>
 </body>
 </html>
