@@ -1,12 +1,18 @@
-# HandbalNieuws Nederland v7 – statisch
+# HandbalNieuws Nederland v8
 
-Deze versie gebruikt geen Netlify Functions en geen eigen API-sleutel. De app leest openbare RSS-feeds via openbare RSS-leesdiensten. Bij uitval toont de app de laatst geladen berichten of directe bronlinks.
+Deze versie bevat:
+- aparte HTML-uitlezing voor Handbal Startpunt;
+- foto's uit RSS/nieuwspagina's plus aantrekkelijke bronafbeeldingen als terugval;
+- het blok 'Vandaag in het handbal';
+- uitslagen en standen in een ingebouwde weergave;
+- favoriete competitielink;
+- live, zoeken, filters en opgeslagen artikelen.
 
-Upload deze vijf bestanden naar de hoofdmap van GitHub:
+Upload deze vijf bestanden naar de hoofdmap van de GitHub-repository:
 - index.html
 - manifest.webmanifest
 - service-worker.js
 - icon-192.png
 - icon-512.png
 
-Oude bestanden zoals news.js, netlify.toml, app.js en articles.json mogen worden verwijderd, maar hoeven de werking niet te blokkeren.
+Verwijder of negeer oude bestanden zoals news.js, netlify.toml, app.js en articles.json.
