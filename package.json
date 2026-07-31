@@ -1,0 +1,12 @@
+{
+  "name": "handbalhub",
+  "private": true,
+  "version": "9.0.0",
+  "type": "module",
+  "scripts": {
+    "update": "node update-data.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.54.0"
+  }
+}

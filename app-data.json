@@ -5,31 +5,36 @@
       "id": "helius-h1",
       "club": "Helius",
       "team": "Heren 1",
-      "competition": "Hoofdklasse C"
+      "competition": "Hoofdklasse C",
+      "poolUrl": ""
     },
     {
       "id": "quintus-d1",
       "club": "Quintus",
       "team": "Dames 1",
-      "competition": "Eredivisie Dames"
+      "competition": "Eredivisie Dames",
+      "poolUrl": ""
     },
     {
       "id": "teamnl-dames",
       "club": "TeamNL",
       "team": "Dames",
-      "competition": "Internationaal"
+      "competition": "Internationaal",
+      "poolUrl": ""
     },
     {
       "id": "aalsmeer-h1",
       "club": "Aalsmeer",
       "team": "Heren 1",
-      "competition": "SHL Men"
+      "competition": "SHL Men",
+      "poolUrl": ""
     },
     {
       "id": "volendam-h1",
       "club": "Volendam",
       "team": "Heren 1",
-      "competition": "SHL Men"
+      "competition": "SHL Men",
+      "poolUrl": ""
     }
   ],
   "teams": {},
@@ -40,6 +45,32 @@
       "title": "Super Handball League TV",
       "source": "SHL TV",
       "url": "https://superhandballeague.tv/live"
+    }
+  ],
+  "competitions": [
+    {
+      "id": "shl-men",
+      "name": "SHL Men",
+      "sourceUrl": "https://superhandballeague.com/",
+      "poolUrl": ""
+    },
+    {
+      "id": "shl-women",
+      "name": "SHL Women",
+      "sourceUrl": "https://superhandballeague.com/",
+      "poolUrl": ""
+    },
+    {
+      "id": "nhl-men",
+      "name": "NHL Men",
+      "sourceUrl": "https://handbal.nl/programma-uitslagen-standen/",
+      "poolUrl": ""
+    },
+    {
+      "id": "eredivisie-dames",
+      "name": "Eredivisie Dames",
+      "sourceUrl": "https://handbal.nl/programma-uitslagen-standen/",
+      "poolUrl": ""
     }
   ]
 }

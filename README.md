@@ -1,27 +1,48 @@
-# HandbalHub 8.0
+# HandbalHub 10.0
 
-Deze zip bevat **geen submappen**. Upload alle bestanden rechtstreeks naar de hoofdmap van je publieke GitHub-repository `handbalhub`.
+Versie 10 bevat:
 
-## Bestanden
-- index.html
-- styles.css
-- app.js
-- app-data.json
-- manifest.webmanifest
-- service-worker.js
-- icon-192.png
-- icon-512.png
-- pages-workflow.txt
-- README.md
+- verbeterde nieuwskaarten zonder grote lege afbeeldingsvlakken;
+- automatische Open Graph-afbeeldingen via GitHub Actions;
+- aparte pagina Competities;
+- meerdere favoriete teams én competities;
+- duidelijke standstatus wanneer de openbare bron nog niet is gevonden;
+- wedstrijdcentrum met nieuws-, Instagram-, Facebook- en YouTube-zoekingen;
+- automatische RSS- en Google Nieuws-update;
+- alleen bevestigde livestreams;
+- automatische poging om openbare Handbal.nl-poules en standen uit te lezen;
+- behoud van de laatst bekende gegevens bij een fout.
 
-## GitHub Pages zonder workflowmap
-Ga na het uploaden naar:
-Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: main → /(root) → Save.
+## Belangrijk voor iPad
 
-De app verschijnt daarna op:
-https://maartenjandekoning-star.github.io/handbalhub/
+De iPad Bestanden-app toont de verborgen map `.github` mogelijk niet.
 
-## Automatische updates
-Omdat je geen submappen in de zip wilt, is de verplichte workflowlocatie `.github/workflows/` niet opgenomen. De app haalt nieuws daarom bij het openen zelf op via openbare RSS-feeds en bewaart het laatste nieuws lokaal.
+Daarom staat de workflow dubbel in deze download:
 
-`pages-workflow.txt` bevat een optionele Pages-workflow. Die is alleen nodig wanneer je later voor Source: GitHub Actions kiest; GitHub vereist dan dat dit bestand op `.github/workflows/pages.yml` staat.
+1. correct op:
+   `.github/workflows/update-handbalhub.yml`
+2. zichtbaar in de hoofdmap als:
+   `github-workflow.yml`
+
+Wanneer de map `.github` niet wordt geüpload:
+
+1. Ga in GitHub naar **Add file → Create new file**.
+2. Typ als bestandsnaam:
+   `.github/workflows/update-handbalhub.yml`
+3. Open lokaal `github-workflow.yml`.
+4. Kopieer de volledige inhoud en plak die in GitHub.
+5. Commit direct naar `main`.
+
+## Eerste automatische update
+
+Ga daarna naar:
+
+**Actions → Update HandbalHub data → Run workflow**
+
+GitHub Pages blijft ingesteld op:
+
+**main → /(root)**
+
+## Eerlijke beperking
+
+De standenrobot gebruikt openbare Handbal.nl-pagina's en is geen officiële Sportlink-koppeling. Wanneer de website geen poulelink of tabel beschikbaar stelt, toont HandbalHub geen verzonnen stand maar een duidelijke bronstatus en een link naar de officiële omgeving.
