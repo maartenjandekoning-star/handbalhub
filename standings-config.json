@@ -1,0 +1,33 @@
+{
+  "season": "2026-2027",
+  "teams": [
+    {
+      "id": "helius-h1",
+      "club": "Helius",
+      "team": "HS1",
+      "competition": "Hoofdklasse HK HS-C"
+    },
+    {
+      "id": "quintus-d1",
+      "club": "Quintus",
+      "team": "DS1",
+      "competition": "Eredivisie Dames"
+    },
+    {
+      "id": "aalsmeer-h1",
+      "club": "Aalsmeer",
+      "team": "HS1",
+      "competition": "SHL Men"
+    },
+    {
+      "id": "volendam-h1",
+      "club": "Volendam",
+      "team": "HS1",
+      "competition": "SHL Men"
+    }
+  ],
+  "sourcePages": [
+    "https://handbal.nl/programma-uitslagen-standen/",
+    "https://handbal.nl/competitie-poules/"
+  ]
+}

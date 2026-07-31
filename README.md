@@ -1,48 +1,33 @@
-# HandbalHub 10.0
+# HandbalHub 12.0 — automatische standen zonder officiële API
 
-Versie 10 bevat:
+De standenoplossing gebruikt:
 
-- verbeterde nieuwskaarten zonder grote lege afbeeldingsvlakken;
-- automatische Open Graph-afbeeldingen via GitHub Actions;
-- aparte pagina Competities;
-- meerdere favoriete teams én competities;
-- duidelijke standstatus wanneer de openbare bron nog niet is gevonden;
-- wedstrijdcentrum met nieuws-, Instagram-, Facebook- en YouTube-zoekingen;
-- automatische RSS- en Google Nieuws-update;
-- alleen bevestigde livestreams;
-- automatische poging om openbare Handbal.nl-poules en standen uit te lezen;
-- behoud van de laatst bekende gegevens bij een fout.
+Handbal.nl → Playwright-browserrobot in GitHub → app-data.json → HandbalHub.
 
-## Belangrijk voor iPad
+## Geen YAML kopiëren
 
-De iPad Bestanden-app toont de verborgen map `.github` mogelijk niet.
+Na upload open je:
 
-Daarom staat de workflow dubbel in deze download:
+`https://maartenjandekoning-star.github.io/handbalhub/install-automation.html`
 
-1. correct op:
-   `.github/workflows/update-handbalhub.yml`
-2. zichtbaar in de hoofdmap als:
-   `github-workflow.yml`
+Tik op **Automatische standen installeren**. GitHub opent het workflowbestand met:
 
-Wanneer de map `.github` niet wordt geüpload:
+- de juiste map;
+- de juiste bestandsnaam;
+- de volledige inhoud.
 
-1. Ga in GitHub naar **Add file → Create new file**.
-2. Typ als bestandsnaam:
-   `.github/workflows/update-handbalhub.yml`
-3. Open lokaal `github-workflow.yml`.
-4. Kopieer de volledige inhoud en plak die in GitHub.
-5. Commit direct naar `main`.
+Je hoeft alleen op **Commit changes** te tikken. De eerste update start daarna automatisch.
 
-## Eerste automatische update
+## Wat de robot doet
 
-Ga daarna naar:
+- opent Handbal.nl als een echte browser;
+- zoekt op club- en teamnamen;
+- verzamelt openbare poulelinks;
+- controleert dynamische netwerkreacties op standen;
+- leest zichtbare tabellen;
+- bewaart de laatst bekende stand wanneer een update mislukt;
+- werkt daarnaast nieuws, afbeeldingen, socialonderwerpen en bevestigde livestreams bij.
 
-**Actions → Update HandbalHub data → Run workflow**
+## Belangrijk
 
-GitHub Pages blijft ingesteld op:
-
-**main → /(root)**
-
-## Eerlijke beperking
-
-De standenrobot gebruikt openbare Handbal.nl-pagina's en is geen officiële Sportlink-koppeling. Wanneer de website geen poulelink of tabel beschikbaar stelt, toont HandbalHub geen verzonnen stand maar een duidelijke bronstatus en een link naar de officiële omgeving.
+Dit gebruikt geen officiële API en geen API-sleutel. Het blijft wel geautomatiseerd uitlezen van openbare pagina's. Wanneer Handbal.nl de technische paginaopbouw wijzigt, kan de herkenning een aanpassing nodig hebben.
