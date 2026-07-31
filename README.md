@@ -1,9 +1,11 @@
-# HandbalNieuws Nederland – versie 3
+# HandbalNieuws Nederland v4
 
-Mobiele PWA met actuele voorbeeldselectie van Nederlands handbalnieuws. Elk bericht verwijst naar de oorspronkelijke nieuwsbron.
+Deze versie bevat nieuws, vormgeving en functionaliteit in één `index.html`.
 
-## Publiceren
-Upload alle bestanden en mappen naar de hoofdmap van de GitHub-repository. Netlify publiceert daarna automatisch een nieuwe versie.
+Upload naar GitHub:
+- index.html
+- manifest.webmanifest
+- service-worker.js
+- map icons
 
-## Belangrijk
-Deze versie bevat handmatig geselecteerde actuele berichten. Automatisch ophalen via RSS/API wordt in een volgende versie toegevoegd zodra per bron een betrouwbare toegestane invoermethode is vastgesteld.
+Vervang de bestaande bestanden. Netlify publiceert daarna automatisch.
