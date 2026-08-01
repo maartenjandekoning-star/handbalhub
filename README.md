@@ -1,18 +1,32 @@
-# HandbalHub 2.0.1 — direct nieuws
+# HandbalHub 3.0 — altijd nieuws
 
-Deze herstelversie lost de trage lege startpagina op.
+Deze versie lost het lege startscherm fundamenteel op.
 
-## Nieuwe laadstrategie
+## Architectuur
 
-1. Laatst bekende nieuwsberichten worden direct uit het apparaat geladen.
-2. De pagina wordt onmiddellijk zichtbaar.
-3. `app-data.json` wordt daarna op de achtergrond vernieuwd.
-4. Een tijdelijk leeg bestand mag bestaande nieuwsberichten nooit meer wissen.
-5. De browsercache wordt niet meer bij iedere opening verwijderd.
-6. De service worker bewaart de laatst succesvolle nieuwsdata.
+- `news.json` — nieuws
+- `live.json` — livevideo
+- `standings.json` — standen
+- `teams.json` kan later afzonderlijk worden toegevoegd
 
-Hierdoor hoeft de gebruiker niet te wachten tot GitHub Actions opnieuw nieuws heeft opgehaald.
+Geen enkel onderdeel kan een ander onderdeel meer leegmaken.
 
-## Uploaden
+## Directe start
 
-Upload de zichtbare bestanden naar de hoofdmap van de repository. Laat `.github/workflows/main.yml` ongewijzigd staan.
+De app bevat bovendien een ingebouwde nieuwssnapshot in `app.js`. Daardoor ziet ook een nieuwe bezoeker direct artikelen, zelfs voordat `news.json` of GitHub Actions beschikbaar is.
+
+## Nieuwsupdate
+
+`update-news-rss.mjs` gebruikt alleen openbare RSS-feeds en geen Chromium of Playwright.
+
+Een update wordt alleen opgeslagen als minimaal drie geldige artikelen zijn gevonden. Bij een storing blijft het bestaande `news.json` intact.
+
+## GitHub
+
+Upload alle zichtbare bestanden op de gebruikelijke manier.
+
+Vervang daarna éénmalig de inhoud van `.github/workflows/main.yml` door de tekst uit:
+
+`VERVANGENDE-WORKFLOW-TEKST.txt`
+
+Daarna duurt een nieuwsupdate normaal geen kwartier, maar hooguit enkele minuten.
