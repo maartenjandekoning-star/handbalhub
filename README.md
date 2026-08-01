@@ -1,14 +1,8 @@
-# HandbalHub 7.4 – Nederlandse relevantie
+# HandbalHub 7.6 – klikbare nieuwsartikelen
 
-Nieuw in 7.4:
-
-- Eurosport-artikelen die via Google Nieuws binnenkomen worden alleen nog toegelaten als er duidelijke Nederlandse relevantie is.
-- Generieke buitenlandse Eurosport-pagina's zoals:
-  - standen;
-  - buitenlandse wedstrijdsamenvattingen;
-  - 'gerelateerde wedstrijden';
-  - generieke uitslagen/hoogtepunten;
-  - buitenlandse programma-overzichten
-  worden geweerd.
-- Relevante Eurosport-berichten over Nederland, Oranje, TeamNL of Nederlandse clubs/spelers kunnen wel blijven staan.
-- Het 30-dagenfilter, WOS-filter, Regionaal-filter en 'In het nieuws vandaag' uit 7.3 blijven ongewijzigd.
+Wijziging:
+- De losse knop/tekst ‘Open artikel →’ is verwijderd uit nieuwskaarten.
+- Tik op de titel om het originele artikel te openen.
+- Als een artikel een foto heeft, is ook de foto klikbaar.
+- De rest van de kaart blijft niet-klikbaar om onbedoeld openen tijdens scrollen te voorkomen.
+- Overige functies en filters uit 7.5 zijn behouden.

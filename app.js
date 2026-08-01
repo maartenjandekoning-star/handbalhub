@@ -405,7 +405,7 @@ function dedupe(arr){
  return [...map.values()].sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
 }
 function card(x){
- return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"><a data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank" rel="noopener">Open artikel →</a></div></article>`
+ return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"></div></article>`
 }
 
 function normalizeTopicText(value=""){
@@ -824,3 +824,119 @@ document.addEventListener("keydown",e=>{
  e.preventDefault();
  window.open(card.dataset.poolUrl,"_blank","noopener");
 });
+
+
+function openPoolForm(){
+ const form=document.querySelector("#poolForm");
+ if(!form)return;
+ form.hidden=false;
+ form.style.display="block";
+ setTimeout(()=>document.querySelector("#poolName")?.focus(),50);
+}
+
+function closePoolForm(){
+ const form=document.querySelector("#poolForm");
+ if(form){
+   form.hidden=true;
+   form.style.display="none";
+ }
+ const name=document.querySelector("#poolName");
+ const url=document.querySelector("#poolUrl");
+ if(name)name.value="";
+ if(url)url.value="";
+}
+
+document.addEventListener("click",async e=>{
+ const add=e.target.closest("#addPoolBtn,#addPoolBtn2");
+ if(add){
+   e.preventDefault();
+   openPoolForm();
+   return;
+ }
+
+ const cancel=e.target.closest("#cancelPoolBtn");
+ if(cancel){
+   e.preventDefault();
+   closePoolForm();
+   return;
+ }
+
+ const save=e.target.closest("#savePoolBtn");
+ if(save){
+   e.preventDefault();
+
+   const name=(document.querySelector("#poolName")?.value||"").trim();
+   const url=(document.querySelector("#poolUrl")?.value||"").trim();
+
+   if(!name){
+     alert("Geef de competitie of poule een naam.");
+     document.querySelector("#poolName")?.focus();
+     return;
+   }
+
+   if(!/^https?:\/\/.+/i.test(url)){
+     alert("Plak een geldige Handbal.nl-link.");
+     document.querySelector("#poolUrl")?.focus();
+     return;
+   }
+
+   // Prevent exact duplicate URLs.
+   const existing=pools.find(p=>p.url===url);
+   if(existing){
+     existing.title=name;
+     existing.manualTitle=name;
+   }else{
+     pools.unshift({
+       url,
+       title:name,
+       manualTitle:name,
+       status:"saved"
+     });
+   }
+
+   localStorage.setItem("hh61_pools",JSON.stringify(pools));
+   closePoolForm();
+   renderPools();
+   return;
+ }
+});
+
+/* v7.6: news title/photo opens article; separate Open article CTA removed visually */
+document.addEventListener("click", e => {
+  const target = e.target.closest(".article-title-link,.article-image-link,[data-news-title],[data-news-image]");
+  if (!target) return;
+  const href = target.getAttribute("href");
+  if (href && href !== "#") return; // normal anchor behavior
+  const card = target.closest(".news-card,.card,article");
+  const link = card?.querySelector('a[href]:not([href="#"])');
+  if (link) {
+    e.preventDefault();
+    window.open(link.href, "_blank", "noopener");
+  }
+});
+
+function enhanceNewsArticleCards(){
+  document.querySelectorAll(".news-card,.card,article").forEach(card=>{
+    const links=[...card.querySelectorAll("a[href]")];
+    const legacy=links.find(a=>/^\s*open artikel\s*(?:→|↗)?\s*$/i.test(a.textContent||""));
+    if(!legacy)return;
+    const href=legacy.href;
+    const title=card.querySelector("h1,h2,h3,.title,.news-title");
+    if(title && !title.closest("a") && !title.querySelector("a")){
+      const a=document.createElement("a");
+      a.href=href; a.target="_blank"; a.rel="noopener"; a.className="article-title-link";
+      title.parentNode.insertBefore(a,title); a.appendChild(title);
+    }
+    const img=card.querySelector("img");
+    if(img && !img.closest("a")){
+      const a=document.createElement("a");
+      a.href=href; a.target="_blank"; a.rel="noopener"; a.className="article-image-link";
+      img.parentNode.insertBefore(a,img); a.appendChild(img);
+    }
+    legacy.remove();
+  });
+}
+const hhNewsObserver=new MutationObserver(enhanceNewsArticleCards);
+hhNewsObserver.observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener("DOMContentLoaded",enhanceNewsArticleCards);
+setTimeout(enhanceNewsArticleCards,500);

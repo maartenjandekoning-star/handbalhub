@@ -148,3 +148,29 @@
 .pool-card-clean:focus-visible,[data-pool-url]:focus-visible{outline:2px solid #ff6a48;outline-offset:2px}
 #refreshBtn.spinning{animation:hh-spin .65s linear infinite}
 @keyframes hh-spin{to{transform:rotate(360deg)}}
+
+/* v7.5 competition form fix */
+#poolForm[hidden]{display:none!important}
+#poolForm:not([hidden]){display:block!important}
+#addPoolBtn{cursor:pointer;touch-action:manipulation}
+
+/* v7.6 – calmer news cards */
+.article-title-link{
+  color:inherit;
+  text-decoration:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.article-title-link:active{opacity:.72}
+.article-image-link{
+  display:block;
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.article-image-link img{display:block;width:100%}
+.news-card .open,
+.news-card .open-article,
+.news-card .article-open,
+.news-card a.cta{
+  /* only hide legacy article CTAs whose text is Open artikel; JS also removes renderer markup */
+}
