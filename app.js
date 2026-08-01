@@ -421,19 +421,27 @@ async function refreshPool(p){
 async function renderPools(){
  const box=$("#poolList");
  if(!box)return;
+ if($("#poolCount"))$("#poolCount").textContent=pools.length?`${pools.length} gevolgd`:"";
+
  if(!pools.length){
-   box.innerHTML='<div class="empty-compact">Nog geen competities toegevoegd.</div>';
+   box.innerHTML=`
+     <div class="pool-empty">
+       <div class="pool-empty-icon">🏆</div>
+       <strong>Nog geen competities toegevoegd</strong>
+       <span>Voeg je eerste poule toe om hem hier snel te openen.</span>
+     </div>`;
    return;
  }
+
  box.innerHTML=pools.map((p,i)=>`
-   <article class="pool-compact">
-     <div class="pool-compact-icon">🏆</div>
-     <div class="pool-compact-main">
+   <article class="pool-card-clean">
+     <div class="pool-badge">🏆</div>
+     <div class="pool-info">
        <strong>${esc(p.manualTitle||p.title||"Mijn competitie")}</strong>
        <span>Handbal.nl</span>
      </div>
-     <a class="pool-open" href="${esc(p.url)}" target="_blank" rel="noopener">Bekijk poule ↗</a>
-     <button class="pool-more" data-pool-more="${i}" aria-label="Meer opties">•••</button>
+     <a class="pool-open-clean" href="${esc(p.url)}" target="_blank" rel="noopener">Open ↗</a>
+     <button class="pool-more-clean" data-pool-more="${i}" aria-label="Meer opties">•••</button>
    </article>
  `).join("");
 }

@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=6.6">
+<link rel="stylesheet" href="styles.css?v=6.7">
 <title>HandbalHub</title>
 </head>
 <body>
@@ -67,15 +67,18 @@
 </section>
 
 <section id="competitionsView" class="view">
-  <div class="page-title"><small>🏆 COMPETITIES</small><h1>Programma, uitslagen & standen</h1></div>
+  <div class="competitions-head">
+    <small>🏆 COMPETITIES</small>
+    <div class="competitions-title-row">
+      <h1>Mijn competities</h1>
+      <span id="poolCount"></span>
+    </div>
+    <p>Je favoriete poules direct bij de hand.</p>
+  </div>
 
-  <div class="provider-grid">
-    <a class="provider-card" href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">
-      <b>Handbal.nl</b><span>Alle officiële competitiegegevens</span><strong>Open Handbal.nl →</strong>
-    </a>
-    <button class="provider-card button-card" id="addPoolBtn">
-      <b>Mijn poule</b><span>Voeg een specifieke Handbal.nl-poule toe</span><strong>+ Poule toevoegen</strong>
-    </button>
+  <div class="competition-toolbar">
+    <button id="addPoolBtn" class="primary-compact">＋ Competitie toevoegen</button>
+    <a class="secondary-compact" href="https://www.handbal.nl/competitie/" target="_blank" rel="noopener">Alle competities ↗</a>
   </div>
 
   <div id="poolForm" class="pool-form" hidden>
@@ -89,14 +92,7 @@
     </div>
   </div>
 
-  <div class="feed-section">
-    <div class="feed-title"><div class="competition-toolbar">
-<button id="addPoolBtn2" class="primary-compact">＋ Competitie toevoegen</button>
-<a class="secondary-compact" href="https://www.handbal.nl/competitie/" target="_blank" rel="noopener">Alle competities ↗</a>
-</div>
-<span>MIJN COMPETITIES</span><small id="poolCount"></small></div>
-    <div id="poolList" class="timeline"></div>
-  </div>
+  <div id="poolList" class="pool-list"></div>
 </section>
 </main>
 </div>
@@ -106,6 +102,6 @@
 <button data-tab="competitions"><span>🏆</span><small>Competities</small></button>
 <button data-tab="live"><span>●</span><small>Live</small></button>
 </nav>
-<script src="app.js?v=6.6"></script>
+<script src="app.js?v=6.7"></script>
 </body>
 </html>
