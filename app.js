@@ -436,26 +436,41 @@ function personalScore(x){
   return score;
 }
 function renderToday(){
- const recent=qualityFilter(items).filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1);
- let pool=(recent.length>=4?recent:items.filter(hasReliableDate).slice(0,30)).slice();
+ const clean=qualityFilter(items).filter(hasReliableDate);
 
- // Eerst onderwerp-deduplicatie, daarna persoonlijke prioriteit.
- pool=dedupeTopics(pool);
- pool.sort((a,b)=>personalScore(b)-personalScore(a)||sourcePreference(b)-sourcePreference(a)||new Date(b.date)-new Date(a.date));
+ let primary=clean.filter(x=>daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1.5);
+ primary=dedupeTopics(primary);
+ primary.sort((a,b)=>
+   personalScore(b)-personalScore(a) ||
+   sourcePreference(b)-sourcePreference(a) ||
+   new Date(b.date)-new Date(a.date)
+ );
 
- const chosen=[],seenCats=new Set();
- for(const x of pool){
-   if(chosen.length>=6)break;
-   if(!seenCats.has(x.category)||chosen.length>=4){
-     chosen.push(x);
-     seenCats.add(x.category);
-   }
+ const chosen=[];
+ function addUnique(x){
+   if(!x || chosen.length>=6)return;
+   if(chosen.some(y=>topicSimilarity(x,y)>=0.58))return;
+   chosen.push(x);
+ }
+
+ primary.forEach(addUnique);
+
+ if(chosen.length<6){
+   let fallback=dedupeTopics(
+     clean.filter(x=>daysAgo(x.date)>1.5&&daysAgo(x.date)<=7)
+   );
+   fallback.sort((a,b)=>
+     personalScore(b)-personalScore(a) ||
+     sourcePreference(b)-sourcePreference(a) ||
+     new Date(b.date)-new Date(a.date)
+   );
+   fallback.forEach(addUnique);
  }
 
  $("#today").innerHTML=chosen.map((x,i)=>{
    const also=(x.alsoPublished||[]).filter(s=>s!==x.source);
    return `<a class="today-link" data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank">
-     <span>${["🔥","🇳🇱","🏆","📍","📰","🤾"][i]}</span>
+     <span>${["🔥","🇳🇱","🏆","📍","📰","🤾"][i]||"📰"}</span>
      <span>
        <b>${esc(x.title)}</b>
        <em>${esc(x.source)}${also.length?` · ook: ${esc([...new Set(also)].slice(0,2).join(", "))}`:""}</em>
@@ -476,7 +491,10 @@ function renderNews(){
  $("#olderTimeline").innerHTML=older.slice(0,olderVisible).map(card).join("")||`<div class="empty">Geen ouder nieuws binnen dit filter.</div>`;
  $("#recentCount").textContent=`${recent.length} berichten`;
  $("#olderCount").textContent=`${older.length} berichten`;
- const cats=["Alles",...new Set(items.map(x=>x.category))];
+ const available=new Set(qualityFilter(items).map(x=>x.category));
+ const preferred=["Alles","TeamNL","Jeugd","Transfers","Nieuws","Regionaal","Competitie","SHL","Beach","Live"];
+ const cats=preferred.filter(c=>c==="Alles"||c==="Regionaal"||available.has(c));
+ [...available].forEach(c=>{if(!cats.includes(c))cats.push(c)});
  $("#chips").innerHTML=cats.map(c=>`<button class="chip ${c===filter?"active":""}" data-filter="${esc(c)}">${esc(c)}</button>`).join("");
  renderToday();renderStatus();
 }
