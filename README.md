@@ -1,43 +1,38 @@
-# HandbalHub 12.0.1 — gecorrigeerde werkende basis
+# HandbalHub 13.0 — stabiele updatearchitectuur
 
-Deze versie bevat de automatische standenoplossing zonder officiële API:
+Versie 13 scheidt drie processen:
 
-Handbal.nl → Playwright-browserrobot → app-data.json → HandbalHub.
+1. `update-news.mjs` — nieuws, afbeeldingen, social en live;
+2. `update-standings.mjs` — alleen bekende poulelinks;
+3. `discover-pools.mjs` — handmatige, begrensde ontdekking van nieuwe poulelinks.
 
-## Belangrijkste correctie
+## Voordelen
 
-De GitHub Actions-workflow gebruikt geen npm-cache meer. Daardoor ontstaat niet langer de fout:
-
-`Dependencies lock file is not found`
-
-Node.js is tevens bijgewerkt naar versie 24.
+- nieuws blijft werken als standen mislukken;
+- normale workflows duren geen kwartier meer;
+- harde time-outs per onderdeel;
+- bestaande poulelinks worden hergebruikt;
+- veilige opslag met fetch + rebase;
+- geen nieuwe submappen;
+- alleen de bestaande `.github/workflows/main.yml`.
 
 ## Uploaden
 
-Upload alle bestanden naar de hoofdmap van je repository. Laat de bestaande map:
+Upload de zichtbare bestanden zoals gebruikelijk. Laat de bestaande map `.github/workflows` in GitHub staan.
 
-`.github/workflows/`
+Vervang daarna één keer de inhoud van `.github/workflows/main.yml` door de workflow uit deze zip, of upload de volledige mapstructuur vanaf een computer die verborgen mappen ondersteunt.
 
-staan. Als je de volledige mapstructuur kunt uploaden, bevat deze zip ook al de juiste workflow.
+## Gebruik
 
-## Workflow
+Onder Actions → Update HandbalHub data → Run workflow kun je kiezen:
 
-De definitieve workflow staat op:
+- `all`
+- `news`
+- `standings`
+- `discover`
 
-`.github/workflows/update-handbalhub.yml`
+De geplande update draait iedere zes uur nieuws en standen. Poule-ontdekking draait alleen handmatig.
 
-De zichtbare kopie voor de installatiepagina staat op:
+## Belangrijke beperking
 
-`workflow-template.yml`
-
-## Eerste test
-
-Ga naar:
-
-Actions → Update HandbalHub data → Run workflow
-
-Bij succes worden nieuws, afbeeldingen, live-items en openbare standen bijgewerkt in `app-data.json`.
-
-## Eerlijke beperking
-
-De standen worden zonder officiële API uit openbare Handbal.nl-pagina's gehaald. Wanneer Handbal.nl de pagina-opbouw wijzigt of een competitie niet openbaar ontsluit, blijft de laatst bekende stand staan.
+Zonder officiële API kan een poulelink niet altijd automatisch worden gevonden. Zodra een concrete `poolUrl` in `standings-config.json` staat, wordt die stand snel en automatisch bijgewerkt.
