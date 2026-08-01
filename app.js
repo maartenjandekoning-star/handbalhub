@@ -707,7 +707,6 @@ async function renderPools(){
        <strong>${esc(p.manualTitle||p.title||"Mijn competitie")}</strong>
        <span>Handbal.nl</span>
      </div>
-     <a class="pool-open-clean" href="${esc(p.url)}" target="_blank" rel="noopener">Open ↗</a>
      <button class="pool-more-clean" data-pool-more="${i}" aria-label="Meer opties">•••</button>
    </article>
  `).join("");
@@ -790,15 +789,27 @@ document.addEventListener("click",e=>{
  if(!more)return;
  const i=Number(more.dataset.poolMore), p=pools[i];
  if(!p)return;
- const choice=prompt("Kies een actie:\n1 = Naam wijzigen\n2 = Verwijderen","1");
- if(choice==="1"){
+ const options=[];
+ if(i>0) options.push("1 = Omhoog");
+ if(i<pools.length-1) options.push("2 = Omlaag");
+ options.push("3 = Naam wijzigen","4 = Verwijderen");
+ const choice=prompt("Kies een actie:\n"+options.join("\n"),i>0?"1":(i<pools.length-1?"2":"3"));
+ if(choice==="1" && i>0){
+   [pools[i-1],pools[i]]=[pools[i],pools[i-1]];
+   localStorage.setItem("hh61_pools",JSON.stringify(pools));
+   renderPools();
+ }else if(choice==="2" && i<pools.length-1){
+   [pools[i],pools[i+1]]=[pools[i+1],pools[i]];
+   localStorage.setItem("hh61_pools",JSON.stringify(pools));
+   renderPools();
+ }else if(choice==="3"){
    const name=prompt("Naam van competitie of poule:",p.manualTitle||p.title||"");
    if(name&&name.trim()){
      p.manualTitle=name.trim();p.title=name.trim();
      localStorage.setItem("hh61_pools",JSON.stringify(pools));
      renderPools();
    }
- }else if(choice==="2"){
+ }else if(choice==="4"){
    if(confirm(`"${p.manualTitle||p.title||"Deze competitie"}" verwijderen?`)){
      pools.splice(i,1);
      localStorage.setItem("hh61_pools",JSON.stringify(pools));
@@ -886,7 +897,7 @@ document.addEventListener("click",async e=>{
      existing.title=name;
      existing.manualTitle=name;
    }else{
-     pools.unshift({
+     pools.push({
        url,
        title:name,
        manualTitle:name,
@@ -940,3 +951,53 @@ const hhNewsObserver=new MutationObserver(enhanceNewsArticleCards);
 hhNewsObserver.observe(document.documentElement,{childList:true,subtree:true});
 document.addEventListener("DOMContentLoaded",enhanceNewsArticleCards);
 setTimeout(enhanceNewsArticleCards,500);
+
+/* v7.7: reliable article links */
+function wireArticleCards(){
+  document.querySelectorAll(".news-card,.card,article").forEach(card=>{
+    let url = card.dataset.articleUrl || card.dataset.url || "";
+
+    const anchors=[...card.querySelectorAll("a[href]")];
+    const legacy=anchors.find(a=>/open artikel/i.test(a.textContent||""));
+    if(!url && legacy) url=legacy.href;
+
+    // Also use an existing genuine article link in the card.
+    if(!url){
+      const genuine=anchors.find(a=>{
+        const h=a.getAttribute("href")||"";
+        return /^https?:/i.test(h) && !/javascript:/i.test(h);
+      });
+      if(genuine) url=genuine.href;
+    }
+    if(!url) return;
+
+    card.dataset.articleUrl=url;
+
+    const title=card.querySelector(".news-title,h1,h2,h3,.title");
+    if(title){
+      title.style.cursor="pointer";
+      title.setAttribute("role","link");
+      title.onclick=(ev)=>{
+        ev.preventDefault(); ev.stopPropagation();
+        window.location.href=url;
+      };
+    }
+
+    const img=card.querySelector("img");
+    if(img){
+      img.style.cursor="pointer";
+      img.onclick=(ev)=>{
+        ev.preventDefault(); ev.stopPropagation();
+        window.location.href=url;
+      };
+    }
+
+    // Remove old CTA only after its URL has been captured.
+    if(legacy) legacy.remove();
+  });
+}
+const hh77Observer=new MutationObserver(()=>wireArticleCards());
+hh77Observer.observe(document.body||document.documentElement,{childList:true,subtree:true});
+document.addEventListener("DOMContentLoaded",wireArticleCards);
+setTimeout(wireArticleCards,250);
+setTimeout(wireArticleCards,1000);

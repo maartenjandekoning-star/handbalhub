@@ -1,8 +1,8 @@
-# HandbalHub 7.6 – klikbare nieuwsartikelen
+# HandbalHub 7.8
 
-Wijziging:
-- De losse knop/tekst ‘Open artikel →’ is verwijderd uit nieuwskaarten.
-- Tik op de titel om het originele artikel te openen.
-- Als een artikel een foto heeft, is ook de foto klikbaar.
-- De rest van de kaart blijft niet-klikbaar om onbedoeld openen tijdens scrollen te voorkomen.
-- Overige functies en filters uit 7.5 zijn behouden.
+- Nieuws: titel opent het daadwerkelijke artikel.
+- Nieuws: foto opent hetzelfde artikel.
+- De losse 'Open artikel' CTA blijft weg.
+- Competities: pijltjes/↗ verwijderd bij 'Alle competities', 'Open' en 'Bekijk poule'.
+- De competitieknoppen en links zelf blijven gewoon werken.
+- Overige functies uit 7.6 behouden.

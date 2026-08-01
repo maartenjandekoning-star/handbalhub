@@ -78,7 +78,7 @@
 
 .pool-card-clean{
   display:grid;
-  grid-template-columns:44px minmax(0,1fr) auto 34px;
+  grid-template-columns:44px minmax(0,1fr) 34px;
   align-items:center;
   gap:10px;
   background:#122c49;
@@ -138,8 +138,7 @@
   .competitions-title-row h1{font-size:25px}
   .competition-toolbar{grid-template-columns:1.15fr 1fr}
   .primary-compact,.secondary-compact{font-size:12px!important;padding:9px 8px!important}
-  .pool-card-clean{grid-template-columns:42px minmax(0,1fr) 58px 32px;gap:8px;padding:10px}
-  .pool-open-clean{padding:8px 9px}
+  .pool-card-clean{grid-template-columns:42px minmax(0,1fr) 32px;gap:8px;padding:10px}
 }
 
 /* v6.9 interaction */
