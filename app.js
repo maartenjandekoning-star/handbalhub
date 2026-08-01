@@ -51,6 +51,44 @@ function category(t=""){
  if(/\b(wk|ek)\b/.test(t)&&/nederland|oranje|teamnl/.test(t))return"TeamNL";
  return"Nieuws"
 }
+
+function handballRelevant(title="",summary="",source=""){
+ const text=`${title} ${summary}`.toLowerCase();
+ const positive=[
+   /\bhandbal\b/, /\bhandball\b/, /\bhandbalster/, /\bhandballer/,
+   /\bsuper handball league\b/, /\bnext handball league\b/,
+   /\bshl\b/, /\bnhl\b/, /\behf\b/, /\bihf\b/,
+   /\boranje u\d{2}\b/, /\bteamnl handbal\b/
+ ];
+ if(positive.some(rx=>rx.test(text))) return true;
+
+ const s=(source||"").toLowerCase();
+ if(
+   s.includes("handbal inside") ||
+   s.includes("handbal startpunt") ||
+   s.includes("handbaloost") ||
+   s.includes("handbal.nl") ||
+   s.includes("super handball")
+ ) return true;
+
+ return false;
+}
+
+function wosHandballRelevant(title="",summary=""){
+ const text=`${title} ${summary}`.toLowerCase();
+ const explicit=/\bhandbal\b|\bhandball\b|\bhandbalster|\bhandballer|\bsuper handball league\b|\bnext handball league\b|\bshl\b|\bnhl\b|\behf\b|\bihf\b/;
+ const otherSport=/\bvoetbal\b|\brugby\b|\bknvb\b|\boefenduel\b|\bvierde divisie\b|\bfc ['’]?[s-]*gravenzande\b|\bexcelsior maassluis\b/;
+ if(otherSport.test(text) && !explicit.test(text)) return false;
+ return explicit.test(text);
+}
+
+function within30Days(x){
+ if(!x || !x.date) return false;
+ const age=daysAgo(x.date);
+ return Number.isFinite(age) && age >= -0.5 && age <= 30;
+}
+
+
 function excluded(title=""){return /privacy|cookie|algemene voorwaarden|contact|over ons|disclaimer|vacature|adverteren|nieuwsbrief/i.test(title)}
 function avatar(s){return(s||"HH").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}
 function imageFromHtml(html=""){const m=html.match(/<img[^>]+(?:src|data-src)=["']([^"']+)/i);return m?.[1]||""}
@@ -298,7 +336,23 @@ async function loadStartpunt(s){
  status[s.name]="fail";return[];
 }
 async function loadSource(s){return s.kind==="page"?loadStartpunt(s):loadRss(s)}
+
+function qualityFilter(arr){
+ return (arr||[]).filter(x=>{
+   if(!x || !x.title || !x.url) return false;
+   if(!within30Days(x)) return false;
+
+   const source=(x.source||"").toLowerCase();
+   if(source==="wos") return wosHandballRelevant(x.title,x.summary||"");
+   if(source.includes("google nieuws")) return handballRelevant(x.title,x.summary||"",x.source);
+
+   return true;
+ });
+}
+
+
 function dedupe(arr){
+ arr=qualityFilter(arr);
  const map=new Map();
  for(const x of arr){
    if(!x?.title||!x?.url||excluded(x.title))continue;
@@ -382,7 +436,7 @@ function personalScore(x){
   return score;
 }
 function renderToday(){
- const recent=items.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1);
+ const recent=qualityFilter(items).filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1);
  let pool=(recent.length>=4?recent:items.filter(hasReliableDate).slice(0,30)).slice();
 
  // Eerst onderwerp-deduplicatie, daarna persoonlijke prioriteit.
@@ -413,11 +467,11 @@ function renderToday(){
 function renderStatus(){$("#sourceStatus").innerHTML=SOURCES.map(s=>`<span class="source-pill ${status[s.name]==="ok"?"ok":""}">${status[s.name]==="ok"?"●":"○"} ${esc(s.name)}</span>`).join("")}
 function renderNews(){
  const q=($("#searchInput").value||"").toLowerCase();
- let list=items.slice().sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
+ let list=qualityFilter(items).slice().sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
  if(filter!=="Alles")list=list.filter(x=>x.category===filter);
  if(q)list=list.filter(x=>(x.title+" "+x.summary+" "+x.source).toLowerCase().includes(q));
  const recent=list.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=7);
- const older=list.filter(x=>!hasReliableDate(x)||daysAgo(x.date)>7);
+ const older=list.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>7&&daysAgo(x.date)<=30);
  $("#recentTimeline").innerHTML=recent.map(card).join("")||`<div class="empty">Geen berichten binnen dit filter in de laatste 7 dagen.</div>`;
  $("#olderTimeline").innerHTML=older.slice(0,olderVisible).map(card).join("")||`<div class="empty">Geen ouder nieuws binnen dit filter.</div>`;
  $("#recentCount").textContent=`${recent.length} berichten`;
@@ -431,7 +485,7 @@ function renderNews(){
 // LIVE: derive concrete stream-related items from current news plus provider searches.
 function liveCandidates(){
  const rx=/live|livestream|rechtstreeks|uitzending|kijk live|stream/i;
- return items.filter(x=>rx.test(x.title+" "+x.summary))
+ return qualityFilter(items).filter(x=>rx.test(x.title+" "+x.summary))
    .map(x=>({...x,category:"Live"}))
    .sort((a,b)=>new Date(a.date)-new Date(b.date));
 }
@@ -599,7 +653,7 @@ async function renderPools(){
 }
 
 async function loadNews(){
- try{const cache=JSON.parse(localStorage.getItem("hh71_news")||"null");items=Array.isArray(cache)&&cache.length>=5?cache:FALLBACK}catch{items=FALLBACK}
+ try{const cache=JSON.parse(localStorage.getItem("hh71_news")||"null");items=qualityFilter(Array.isArray(cache)&&cache.length>=5?cache:FALLBACK)}catch{items=qualityFilter(FALLBACK)}
  renderNews();renderLive();
  const batches=await Promise.all(SOURCES.map(loadSource));
  let fresh=dedupe(batches.flat());
