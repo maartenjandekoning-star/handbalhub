@@ -6,10 +6,11 @@ const SOURCES=[
  {name:"Handbal Startpunt",kind:"page",url:"https://www.handbalstartpunt.nl/nieuws/",base:"https://www.handbalstartpunt.nl"},
  {name:"HandbalOost",kind:"rss",url:"https://handbaloost.nl/feed/"},
  {name:"Super Handball League",kind:"rss",url:"https://superhandballeague.com/feed/"},
- {name:"Groot Hellevoet",kind:"rss",url:"https://news.google.com/rss/search?q=site%3Agroothellevoet.nl%20handbal&hl=nl&gl=NL&ceid=NL%3Anl"},
+ {name:"Groot Hellevoet",kind:"rss",url:"https://news.google.com/rss/search?q=site%3Agroothellevoet.nl%20(Handbal%20OR%20Helius)&hl=nl&gl=NL&ceid=NL%3Anl"},
+ {name:"WOS",kind:"rss",url:"https://news.google.com/rss/search?q=site%3Awos.nl%20(handbal%20OR%20Quintus%20OR%20VELO%20OR%20Westlandia%20OR%20DIOS)&hl=nl&gl=NL&ceid=NL%3Anl"},
  {name:"NOS Sport",kind:"rss",url:"https://news.google.com/rss/search?q=site%3Anos.nl%20handbal&hl=nl&gl=NL&ceid=NL%3Anl"},
  {name:"NU.nl Sport",kind:"rss",url:"https://news.google.com/rss/search?q=site%3Anu.nl%20handbal&hl=nl&gl=NL&ceid=NL%3Anl"},
- {name:"Google Nieuws",kind:"rss",url:"https://news.google.com/rss/search?q=%22handbal%22%20Nederland&hl=nl&gl=NL&ceid=NL%3Anl"}
+ {name:"Google Nieuws",kind:"rss",url:"https://news.google.com/rss/search?q=handbal&hl=nl&gl=NL&ceid=NL%3Anl"}
 ];
 
 const RSS2JSON="https://api.rss2json.com/v1/api.json?rss_url=";
@@ -44,7 +45,7 @@ function category(t=""){
  if(/beach/.test(t))return"Beach";
  if(/jeugd|u17|u18|u19|u20/.test(t)&&!/oranje|nederland|teamnl/.test(t))return"Jeugd";
  if(/beker|competitie|programma|uitslag|stand/.test(t))return"Competitie";
- if(/helius|hellevoet|handbaloost|oost-nederland|regionaal/.test(t))return"Regionaal";
+ if(/helius|hellevoet|handbaloost|oost-nederland|quintus|velo|westlandia|dios|wos|regionaal/.test(t))return"Regionaal";
  // TeamNL deliberately strict:
  if(/teamnl|oranje|nederlands(e)? selectie|nationale selectie/.test(t))return"TeamNL";
  if(/\b(wk|ek)\b/.test(t)&&/nederland|oranje|teamnl/.test(t))return"TeamNL";
@@ -144,10 +145,55 @@ async function enrichRecentImages(){
  }
  await Promise.all([worker(),worker(),worker()]);
  if(changed){
-   try{localStorage.setItem("hh61_news",JSON.stringify(items))}catch{}
+   try{localStorage.setItem("hh71_news",JSON.stringify(items))}catch{}
  }
 }
 
+function cleanGoogleTitle(title=""){
+ return strip(title).replace(/\s+-\s+[^-]{2,80}$/," ").trim();
+}
+function googlePublisher(title=""){
+ const m=strip(title).match(/\s+-\s+([^-]{2,80})$/);
+ return m?m[1].trim():"";
+}
+function canonicalTitle(title=""){
+ return normalizeTopicText(cleanGoogleTitle(title));
+}
+function isGoogleItem(x){return /google nieuws/i.test(x.source||"")||/news\.google\.com/i.test(x.url||"")}
+function sameStory(a,b){
+ const A=canonicalTitle(a.title),B=canonicalTitle(b.title);
+ if(A&&B&&(A===B||A.includes(B)||B.includes(A)))return true;
+ return topicSimilarity(a,b)>=0.58;
+}
+function preferOriginalSources(arr){
+ const originals=arr.filter(x=>!isGoogleItem(x));
+ return arr.filter(x=>{
+   if(!isGoogleItem(x))return true;
+   return !originals.some(o=>sameStory(x,o));
+ });
+}
+async function resolveGoogleLink(x){
+ if(!isGoogleItem(x))return x;
+ const pub=googlePublisher(x.title);
+ // Google-discovered items keep their discovery metadata, but try to replace the Google redirect by the publisher URL.
+ try{
+   const r=await withTimeout(fetch(x.url,{redirect:"follow",cache:"no-store"}),6000);
+   if(r.url&&!/google\./i.test(new URL(r.url).hostname)){
+     x.url=r.url;x.source=pub||x.source;x.title=cleanGoogleTitle(x.title);return x;
+   }
+ }catch{}
+ // For known regional publishers, use a direct publisher search page rather than a Google destination.
+ if(/groot hellevoet/i.test(pub)){
+   x.url="https://www.groothellevoet.nl/zoek?q="+encodeURIComponent(cleanGoogleTitle(x.title));
+   x.source="Groot Hellevoet";x.title=cleanGoogleTitle(x.title);
+ }
+ return x;
+}
+async function resolveDiscoveryLinks(list){
+ const q=list.filter(isGoogleItem).slice(0,35);
+ await Promise.all(q.map(resolveGoogleLink));
+ return list;
+}
 function normalize(it,source){
  let image=
    it.thumbnail||
@@ -298,7 +344,8 @@ function sourcePreference(x){
  if(s.includes("handbal startpunt"))return 80;
  if(s.includes("super handball"))return 75;
  if(s.includes("handbaloost"))return 70;
- if(s.includes("groot hellevoet"))return 65;
+ if(s.includes("groot hellevoet"))return 72;
+ if(s.includes("wos"))return 72;
  if(s.includes("nos"))return 60;
  if(s.includes("nu.nl"))return 55;
  if(s.includes("google nieuws"))return 10;
@@ -552,13 +599,15 @@ async function renderPools(){
 }
 
 async function loadNews(){
- try{const cache=JSON.parse(localStorage.getItem("hh61_news")||"null");items=Array.isArray(cache)&&cache.length>=5?cache:FALLBACK}catch{items=FALLBACK}
+ try{const cache=JSON.parse(localStorage.getItem("hh71_news")||"null");items=Array.isArray(cache)&&cache.length>=5?cache:FALLBACK}catch{items=FALLBACK}
  renderNews();renderLive();
  const batches=await Promise.all(SOURCES.map(loadSource));
- const fresh=dedupe(batches.flat());
+ let fresh=dedupe(batches.flat());
+ await resolveDiscoveryLinks(fresh);
+ fresh=dedupe(preferOriginalSources(fresh));
  if(fresh.length>=5){
-   items=dedupe([...fresh,...items]).slice(0,150);
-   localStorage.setItem("hh61_news",JSON.stringify(items));
+   items=dedupe(preferOriginalSources([...fresh,...items])).slice(0,180);
+   localStorage.setItem("hh71_news",JSON.stringify(items));
  }
  renderNews();renderLive();
  enrichRecentImages().catch(()=>{});

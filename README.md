@@ -1,20 +1,13 @@
-# HandbalHub 7.0 – betere afbeeldingen
+# HandbalHub 7.1 – bronnen & deduplicatie
 
-Deze versie verandert alleen de afbeeldingslogica van de nieuwsfeed.
+Wijzigingen t.o.v. 7.0:
+- WOS toegevoegd als vaste regionale ontdekkingsbron voor o.a. Quintus, VELO, Westlandia en DIOS.
+- Groot Hellevoet breder gezocht op Handbal/Helius.
+- Google Nieuws zoekt breder op `handbal` om ook regionale en clubbronnen te ontdekken.
+- Dubbele Google Nieuws-items verdwijnen wanneer hetzelfde verhaal al via een originele bron binnenkomt.
+- Handbal Inside houdt de hoogste bronprioriteit bij hetzelfde nieuws.
+- Bij Google-resultaten wordt geprobeerd de uiteindelijke uitgeverslink te achterhalen.
+- Voor Groot Hellevoet wordt, wanneer directe resolutie niet lukt, minimaal naar de zoekpagina op Groot Hellevoet verwezen in plaats van naar Google.
+- Nieuwe cacheversie zodat oude duplicaten niet blijven hangen.
 
-Volgorde:
-1. afbeelding die RSS2JSON al levert;
-2. RSS media:thumbnail / media:content / enclosure;
-3. afbeelding in de RSS-omschrijving;
-4. wanneer nog niets beschikbaar is: og:image / Twitter image van het oorspronkelijke artikel.
-
-Belangrijk:
-- de feed verschijnt meteen;
-- het ophalen van ontbrekende artikelafbeeldingen gebeurt daarna op de achtergrond;
-- maximaal 24 recente artikelen worden per sessie gecontroleerd;
-- maximaal 3 artikelpagina's tegelijk;
-- gevonden afbeeldingen worden lokaal gecachet;
-- Google Nieuws-redirectlinks worden niet extra gescrapet;
-- geen afbeelding wordt verzonnen.
-
-De overige werking van HandbalHub 6.9 is ongemoeid gelaten.
+De bestaande vormgeving, Live en Competities zijn verder ongemoeid gelaten.
