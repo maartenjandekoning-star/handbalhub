@@ -21,6 +21,7 @@ let interest=JSON.parse(localStorage.getItem("hh61_interest")||"{}");
 let pools=JSON.parse(localStorage.getItem("hh61_pools")||"[]");
 let status={};
 
+let currentTab="news";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>(s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return(d.textContent||"").replace(/\s+/g," ").trim()};
@@ -157,7 +158,7 @@ function dedupe(arr){
  return [...map.values()].sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
 }
 function card(x){
- return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"><a data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank" rel="noopener">Open originele bron →</a></div></article>`
+ return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"><a data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank" rel="noopener">Open artikel →</a></div></article>`
 }
 
 function normalizeTopicText(value=""){
@@ -434,7 +435,7 @@ async function renderPools(){
  }
 
  box.innerHTML=pools.map((p,i)=>`
-   <article class="pool-card-clean">
+   <article class="pool-card-clean" data-pool-url="${esc(p.url)}" role="link" tabindex="0">
      <div class="pool-badge">🏆</div>
      <div class="pool-info">
        <strong>${esc(p.manualTitle||p.title||"Mijn competitie")}</strong>
@@ -458,6 +459,7 @@ async function loadNews(){
  renderNews();renderLive();
 }
 function showTab(tab){
+ currentTab=tab;
  $$(".view").forEach(v=>v.classList.remove("active"));
  $("#"+tab+"View").classList.add("active");
  $$(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
@@ -489,18 +491,23 @@ document.addEventListener("click",async e=>{
 
 $("#searchBtn").onclick=()=>{$("#searchbar").hidden=!$("#searchbar").hidden;if(!$("#searchbar").hidden)$("#searchInput").focus()};
 $("#searchInput").oninput=renderNews;
-$("#refreshBtn").onclick=async()=>{await loadNews();await renderPools(true)};
-$("#addPoolBtn").onclick=()=>{$("#poolForm").hidden=false;$("#poolUrl").focus()};
-$("#cancelPoolBtn").onclick=()=>{$("#poolForm").hidden=true;$("#poolName").value="";$("#poolUrl").value=""};
-$("#savePoolBtn").onclick=async()=>{
- const name=$("#poolName").value.trim();
- const url=$("#poolUrl").value.trim();
- if(!name){alert("Geef de competitie of poule een naam.");return}
- if(!/^https?:\/\//.test(url)){alert("Plak een geldige Handbal.nl-link.");return}
- const p={url,title:name,manualTitle:name,summary:"",rows:[],status:"new"};
- pools.unshift(p);localStorage.setItem("hh61_pools",JSON.stringify(pools));
- $("#poolForm").hidden=true;$("#poolName").value="";$("#poolUrl").value="";
- await refreshPool(p);renderPools(false);
+$("#refreshBtn").onclick=async()=>{
+ const btn=$("#refreshBtn");
+ btn?.classList.add("spinning");
+ try{
+   if(currentTab==="news"){
+     await loadNews();
+   }else if(currentTab==="live"){
+     await loadNews();
+     renderLive();
+   }else if(currentTab==="competitions"){
+     renderPools();
+   }else{
+     await loadNews();
+   }
+ }finally{
+   setTimeout(()=>btn?.classList.remove("spinning"),350);
+ }
 };
 new IntersectionObserver(es=>{if(es[0].isIntersecting){olderVisible+=25;renderNews()}},{rootMargin:"400px"}).observe($("#sentinel"));
 
@@ -533,3 +540,18 @@ document.addEventListener("click",e=>{
 
 const addPoolBtn2=document.querySelector("#addPoolBtn2");
 if(addPoolBtn2)addPoolBtn2.onclick=()=>{document.querySelector("#poolForm").hidden=false;document.querySelector("#poolName")?.focus();};
+
+
+document.addEventListener("click",e=>{
+ const card=e.target.closest("[data-pool-url]");
+ if(!card)return;
+ if(e.target.closest("a,button,input,label"))return;
+ window.open(card.dataset.poolUrl,"_blank","noopener");
+});
+document.addEventListener("keydown",e=>{
+ const card=e.target.closest?.("[data-pool-url]");
+ if(!card||!(e.key==="Enter"||e.key===" "))return;
+ if(e.target.closest("a,button,input,label"))return;
+ e.preventDefault();
+ window.open(card.dataset.poolUrl,"_blank","noopener");
+});

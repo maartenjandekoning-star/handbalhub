@@ -141,3 +141,10 @@
   .pool-card-clean{grid-template-columns:42px minmax(0,1fr) 58px 32px;gap:8px;padding:10px}
   .pool-open-clean{padding:8px 9px}
 }
+
+/* v6.9 interaction */
+.pool-card-clean,[data-pool-url]{cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease}
+.pool-card-clean:active,[data-pool-url]:active{transform:scale(.985)}
+.pool-card-clean:focus-visible,[data-pool-url]:focus-visible{outline:2px solid #ff6a48;outline-offset:2px}
+#refreshBtn.spinning{animation:hh-spin .65s linear infinite}
+@keyframes hh-spin{to{transform:rotate(360deg)}}

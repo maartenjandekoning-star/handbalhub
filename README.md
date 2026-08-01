@@ -1,7 +1,7 @@
-# HandbalHub 6.8
+# HandbalHub 6.9
 
-Enige wijziging:
-- De knop 'Alle competities ↗' verwijst nu correct naar:
-  https://handbal.nl/programma-uitslagen-standen/
-
-Verder is HandbalHub 6.7 ongewijzigd gebleven.
+- Hele competitiekaart is klikbaar; ••• blijft apart.
+- Nieuws gebruikt voortaan “Open artikel →”.
+- Vernieuwen werkt per tab: nieuws opnieuw ophalen, live opnieuw opbouwen, competities opnieuw renderen.
+- Vernieuwknop geeft draaifeedback.
+- App-shell is network-first zodat nieuwe GitHub-versies sneller zichtbaar worden en oude PWA-cache minder in de weg zit.
