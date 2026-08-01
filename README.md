@@ -1,10 +1,7 @@
-# HandbalHub 6.7 – Competities redesign
+# HandbalHub 6.8
 
-Alleen het Competities-scherm is opnieuw opgebouwd.
+Enige wijziging:
+- De knop 'Alle competities ↗' verwijst nu correct naar:
+  https://handbal.nl/programma-uitslagen-standen/
 
-- Oude grote Handbal.nl/Mijn poule-tegels volledig verwijderd.
-- Kop teruggebracht naar 'Mijn competities'.
-- Compacte acties: '+ Competitie toevoegen' en 'Alle competities ↗'.
-- Gevolgde competities zijn lage, compacte kaarten.
-- Per kaart: naam, Handbal.nl, Open ↗ en klein •••-menu.
-- Nieuws, Live en onderste navigatie zijn verder niet aangepast.
+Verder is HandbalHub 6.7 ongewijzigd gebleven.
