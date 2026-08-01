@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=6.4">
+<link rel="stylesheet" href="styles.css?v=6.5">
 <title>HandbalHub</title>
 </head>
 <body>
@@ -79,7 +79,9 @@
   </div>
 
   <div id="poolForm" class="pool-form" hidden>
-    <label for="poolUrl">Plak de directe URL van de poule op Handbal.nl</label>
+    <label for="poolName">Naam competitie of poule</label>
+    <input id="poolName" type="text" placeholder="Bijv. Coinmerce SHL Men" autocomplete="off">
+    <label for="poolUrl" style="margin-top:10px">Handbal.nl-link</label>
     <input id="poolUrl" type="url" placeholder="https://handbal.nl/..." inputmode="url">
     <div class="row-actions">
       <button class="primary" id="savePoolBtn">Toevoegen</button>
@@ -92,11 +94,6 @@
     <div id="poolList" class="timeline"></div>
   </div>
 </section>
-
-<section id="savedView" class="view">
-  <div class="page-title"><small>★ MIJN HUB</small><h1>Opgeslagen nieuws</h1></div>
-  <div class="timeline" id="savedTimeline"></div>
-</section>
 </main>
 </div>
 
@@ -104,8 +101,7 @@
 <button class="active" data-tab="news"><span>▤</span><small>Nieuws</small></button>
 <button data-tab="live"><span>●</span><small>Live</small></button>
 <button data-tab="competitions"><span>🏆</span><small>Competities</small></button>
-<button data-tab="saved"><span>★</span><small>Mijn Hub</small></button>
 </nav>
-<script src="app.js?v=6.4"></script>
+<script src="app.js?v=6.5"></script>
 </body>
 </html>

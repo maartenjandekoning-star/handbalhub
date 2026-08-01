@@ -1,19 +1,15 @@
-# HandbalHub 6.4
+# HandbalHub 6.5 – eenvoudiger
 
-Gerichte verbeteringen bovenop 6.3:
+Gerichte vereenvoudiging:
 
-## In het nieuws vandaag
-- dubbele artikelen over hetzelfde onderwerp worden samengevoegd;
-- kleine titelverschillen tellen ook als hetzelfde onderwerp;
-- Handbal Inside krijgt bij dubbele berichtgeving de hoogste bronvoorkeur;
-- daarna volgen Handbal.nl, Handbal Startpunt en andere directe bronnen;
-- Google Nieuws is alleen laatste voorkeur;
-- eventueel verschijnt compact 'ook: ...' bij andere bronnen.
+- Handbal Startpunt blijft een vaste bron.
+- De HTML-parser herkent nu ook Nederlandse datums zoals 31 juli 2026 en 31-07-2026.
+- Ontbreekt een betrouwbare datum, dan blijft het artikel onder ouder nieuws staan.
+- Bij het toevoegen van een Handbal.nl-poule zijn naam én link verplicht.
+- De handmatig ingevoerde poulenaam is altijd leidend.
+- Bestaande poules kunnen via 'Naam wijzigen' worden hernoemd.
+- Mijn Hub is verwijderd.
+- Opslaanhartjes zijn verwijderd.
+- Navigatie bestaat nu alleen uit Nieuws, Live en Competities.
 
-## Competities
-- de echte poule-/competitienaam wordt uit de Handbal.nl-pagina gehaald;
-- 'Poule Coinmerce SHL Men' wordt bijvoorbeeld 'Coinmerce SHL Men';
-- breadcrumbs worden als extra bron voor de naam gebruikt;
-- generieke titels als 'Competitie - poule' worden zoveel mogelijk vermeden.
-
-De nieuwsengine, datumfix, Live-tab en overige functionaliteit zijn verder niet aangepast.
+De bestaande RSS-engine, nieuws-deduplicatie en datumregels blijven verder intact.
