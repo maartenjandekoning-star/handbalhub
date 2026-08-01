@@ -1,9 +1,14 @@
-# HandbalHub 7.3
+# HandbalHub 7.4 – Nederlandse relevantie
 
-Wijzigingen:
-- 'In het nieuws vandaag' toont maximaal 6 unieke onderwerpen.
-- Eerst worden actuele berichten uit ongeveer de laatste 36 uur gebruikt.
-- Als dat er minder dan 6 zijn, wordt aangevuld met relevante unieke berichten uit de laatste 7 dagen.
-- Onderwerp-deduplicatie en bronvoorkeur blijven actief.
-- Regionaal is weer een vaste filterknop.
-- 30-dagenfilter en WOS-kwaliteitsfilter uit 7.2 blijven behouden.
+Nieuw in 7.4:
+
+- Eurosport-artikelen die via Google Nieuws binnenkomen worden alleen nog toegelaten als er duidelijke Nederlandse relevantie is.
+- Generieke buitenlandse Eurosport-pagina's zoals:
+  - standen;
+  - buitenlandse wedstrijdsamenvattingen;
+  - 'gerelateerde wedstrijden';
+  - generieke uitslagen/hoogtepunten;
+  - buitenlandse programma-overzichten
+  worden geweerd.
+- Relevante Eurosport-berichten over Nederland, Oranje, TeamNL of Nederlandse clubs/spelers kunnen wel blijven staan.
+- Het 30-dagenfilter, WOS-filter, Regionaal-filter en 'In het nieuws vandaag' uit 7.3 blijven ongewijzigd.

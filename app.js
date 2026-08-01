@@ -337,6 +337,38 @@ async function loadStartpunt(s){
 }
 async function loadSource(s){return s.kind==="page"?loadStartpunt(s):loadRss(s)}
 
+
+function dutchRelevant(title="",summary=""){
+ const text=`${title} ${summary}`.toLowerCase();
+
+ const nlSignals=[
+   /\bnederland\b/, /\bnederlandse\b/, /\boranje\b/, /\bteamnl\b/,
+   /\bnhv\b/, /\bhandbal\.nl\b/, /\bhandbal inside\b/, /\bhandbal startpunt\b/,
+   /\bshl\b/, /\bsuper handball league\b/, /\bnext handball league\b/,
+   /\bvolendam\b/, /\bbevo\b/, /\baalsmeer\b/, /\bhurry[- ]?up\b/,
+   /\bquintus\b/, /\bvelo\b/, /\bdios\b/, /\bhelius\b/,
+   /\bhercules\b/, /\bhouten\b/, /\bwestlandia\b/,
+   /\bwijhe\b/, /\btachos\b/, /\bvzv\b/, /\bbocholt\b/
+ ];
+
+ return nlSignals.some(rx=>rx.test(text));
+}
+
+function isGenericEurosportForeign(title="",summary=""){
+ const text=`${title} ${summary}`.toLowerCase();
+
+ const eurosportPatterns=[
+   /\bstand:\s*handbal scores\b/,
+   /\bsamenvatting:\s*handbal uitslagen\b/,
+   /\bgerelateerde wedstrijden:\s*live handbal updates\b/,
+   /\bhandbal uitslagen en hoogtepunten\b/,
+   /\bresultaten en programma\b/
+ ];
+
+ return eurosportPatterns.some(rx=>rx.test(text));
+}
+
+
 function qualityFilter(arr){
  return (arr||[]).filter(x=>{
    if(!x || !x.title || !x.url) return false;
@@ -344,7 +376,18 @@ function qualityFilter(arr){
 
    const source=(x.source||"").toLowerCase();
    if(source==="wos") return wosHandballRelevant(x.title,x.summary||"");
-   if(source.includes("google nieuws")) return handballRelevant(x.title,x.summary||"",x.source);
+   if(source.includes("google nieuws")){
+     const title=x.title||"", summary=x.summary||"";
+     if(!handballRelevant(title,summary,x.source)) return false;
+
+     // Eurosport via Google Nieuws: alleen Nederlandse relevantie toestaan.
+     if(/eurosport/i.test(`${title} ${summary}`)){
+       if(isGenericEurosportForeign(title,summary)) return false;
+       if(!dutchRelevant(title,summary)) return false;
+     }
+
+     return true;
+   }
 
    return true;
  });
