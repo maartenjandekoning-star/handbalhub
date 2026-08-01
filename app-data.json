@@ -72,5 +72,7 @@
       "sourceUrl": "https://handbal.nl/programma-uitslagen-standen/",
       "poolUrl": ""
     }
-  ]
+  ],
+  "buildVersion": "12.0.1",
+  "workflowFixed": true
 }
