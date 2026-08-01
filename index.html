@@ -3,88 +3,139 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#061d3a">
+  <meta name="theme-color" content="#051a35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="styles.css">
-  <title>HandbalHub 13.1</title>
+  <link rel="stylesheet" href="styles.css?v=2.0.0">
+  <title>HandbalHub</title>
 </head>
 <body>
-<div class="app">
-  <header class="hero hero-news">
-    <div class="top">
+<div class="app-shell">
+  <header class="masthead">
+    <div class="brandbar">
       <div class="brand">
         <img src="icon-192.png" alt="HandbalHub">
-        <div><h1>HANDBAL<span>HUB</span></h1><p>NEDERLAND</p></div>
+        <div class="brand-copy">
+          <strong>HANDBAL<span>HUB</span></strong>
+          <small>NEDERLAND</small>
+        </div>
       </div>
-      <button class="round" id="refreshButton" aria-label="Vernieuwen">↻</button>
+      <button id="refreshButton" class="icon-button" aria-label="Vernieuwen">↻</button>
     </div>
-    <div class="welcome">
-      <h2>Het laatste Nederlandse handbalnieuws</h2>
-      <p id="updatedText">Nieuws wordt geladen…</p>
+
+    <div class="headline">
+      <div>
+        <p class="eyebrow">JOUW DAGELIJKSE HANDBALUPDATE</p>
+        <h1>Alles wat vandaag telt.</h1>
+        <p id="updatedText">Nieuws wordt geladen…</p>
+      </div>
     </div>
-    <div class="news-kpis">
-      <div><strong id="nNews">0</strong><span>berichten</span></div>
-      <div><strong id="nSources">0</strong><span>bronnen</span></div>
-      <div><strong id="nLive">0</strong><span>live</span></div>
+
+    <div class="search-wrap">
+      <span>⌕</span>
+      <input id="newsSearch" type="search" placeholder="Zoek club, speler of onderwerp">
     </div>
   </header>
 
   <main>
     <section id="news" class="view active">
-      <div class="news-toolbar">
-        <input class="search" id="newsSearch" placeholder="Zoek club, speler of onderwerp">
-        <div class="filters" id="newsFilters"></div>
+      <div id="loadingState" class="skeleton-stack">
+        <div class="skeleton hero-skeleton"></div>
+        <div class="skeleton line"></div>
+        <div class="skeleton line short"></div>
       </div>
-      <div id="newsStatus" class="data-state">Nieuws wordt voorbereid…</div>
-      <div class="news-grid section" id="allNews"></div>
-    </section>
 
-    <section id="teams" class="view">
-      <div class="section-head"><h2>Mijn teams</h2><span class="badge">Favorieten</span></div>
-      <div class="card setup">
-        <h3>Zoek en volg</h3>
-        <input class="search" id="teamSearch" placeholder="Zoek club, team of competitie">
-        <div id="catalog"></div>
-      </div>
-    </section>
+      <div id="newsContent" hidden>
+        <section id="heroSection" class="section-block">
+          <article id="heroStory" class="hero-story"></article>
+        </section>
 
-    <section id="competitions" class="view">
-      <div class="section-head"><h2>Competities</h2><span class="badge">Standen</span></div>
-      <div class="card setup">
-        <input class="search" id="competitionSearch" placeholder="Zoek competitie">
-        <div id="competitionCatalog"></div>
+        <section class="section-block today-block">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow dark">DAGOVERZICHT</p>
+              <h2>Vandaag in het handbal</h2>
+            </div>
+            <span class="date-chip" id="todayLabel"></span>
+          </div>
+          <div id="todayList" class="today-list"></div>
+        </section>
+
+        <section class="section-block filter-block">
+          <div class="filters" id="newsFilters"></div>
+        </section>
+
+        <section class="section-block latest-block">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow dark">ACTUEEL</p>
+              <h2>Laatste nieuws</h2>
+            </div>
+            <span id="resultCount" class="count-label"></span>
+          </div>
+          <div id="newsFeed" class="news-feed"></div>
+          <button id="loadMore" class="load-more">Meer berichten laden</button>
+        </section>
       </div>
-      <div class="section"><div class="grid grid-2" id="favoriteCompetitions"></div></div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <img src="icon-192.png" alt="">
+        <h2>De nieuwsfeed wordt bijgewerkt</h2>
+        <p>GitHub haalt automatisch de nieuwste artikelen op. Probeer over een paar minuten opnieuw.</p>
+        <button class="primary-button" id="emptyRefresh">Opnieuw proberen</button>
+      </div>
     </section>
 
     <section id="live" class="view">
-      <div class="section-head"><h2>Live & video</h2><span class="badge live">Bevestigd</span></div>
-      <div class="card" id="liveList"></div>
+      <div class="page-heading"><p class="eyebrow dark">KIJK MEE</p><h2>Live & video</h2></div>
+      <div id="liveList" class="stack"></div>
+    </section>
+
+    <section id="competitions" class="view">
+      <div class="page-heading"><p class="eyebrow dark">PROGRAMMA & STAND</p><h2>Competities</h2></div>
+      <div class="glass-card">
+        <input id="competitionSearch" class="inline-search" placeholder="Zoek competitie">
+        <div id="competitionCatalog"></div>
+      </div>
+      <div id="favoriteCompetitions" class="stack section-gap"></div>
+    </section>
+
+    <section id="myhandball" class="view">
+      <div class="page-heading"><p class="eyebrow dark">PERSOONLIJK</p><h2>Mijn handbal</h2></div>
+      <div class="glass-card">
+        <input id="teamSearch" class="inline-search" placeholder="Zoek club of team">
+        <div id="teamCatalog"></div>
+      </div>
+      <div class="section-title-row section-gap"><h2>Opgeslagen nieuws</h2></div>
+      <div id="savedNews" class="news-feed"></div>
     </section>
 
     <section id="more" class="view">
-      <div class="section-head"><h2>Meer</h2></div>
+      <div class="page-heading"><p class="eyebrow dark">HANDIGE LINKS</p><h2>Meer</h2></div>
       <div class="hub-grid">
-        <button class="hub-tile" data-go="teams"><b>★</b><span>Mijn teams</span></button>
-        <button class="hub-tile" data-go="competitions"><b>🏆</b><span>Competities</span></button>
-        <button class="hub-tile" data-go="live"><b>▶</b><span>Live & video</span></button>
-        <a class="hub-tile" href="https://handbal.nl/programma-uitslagen-standen/" target="_blank"><b>▦</b><span>Handbal.nl</span></a>
-        <a class="hub-tile" href="https://apps.apple.com/nl/app/handbalnl/id1272156836" target="_blank"><b>📱</b><span>HandbalNL</span></a>
+        <a href="https://handbal.nl/" target="_blank" class="hub-tile"><b>H</b><span>Handbal.nl</span><small>Nieuws en informatie</small></a>
+        <a href="https://handbal.nl/programma-uitslagen-standen/" target="_blank" class="hub-tile"><b>▦</b><span>Programma</span><small>Officiële gegevens</small></a>
+        <a href="https://superhandballeague.tv/live" target="_blank" class="hub-tile"><b>▶</b><span>SHL TV</span><small>Live en video</small></a>
+        <a href="https://apps.apple.com/nl/app/handbalnl/id1272156836" target="_blank" class="hub-tile"><b>NL</b><span>HandbalNL</span><small>Open in App Store</small></a>
       </div>
-      <div class="card section"><h2>Opgeslagen</h2><div class="news-grid" id="saved"></div></div>
+      <div class="about-card section-gap">
+        <img src="handbalhub-logo.png" alt="HandbalHub">
+        <div><h3>HandbalHub 2.0</h3><p>Nederlands handbalnieuws, livevideo en competities in één premium sportomgeving.</p></div>
+      </div>
     </section>
   </main>
 </div>
 
-<nav class="nav">
-  <button class="active" data-view="news"><b>▤</b>Nieuws</button>
-  <button data-view="teams"><b>★</b>Mijn teams</button>
-  <button data-view="competitions"><b>🏆</b>Competities</button>
-  <button data-view="live"><b>▶</b>Live</button>
-  <button data-view="more"><b>•••</b>Meer</button>
+<nav class="bottom-nav" aria-label="Hoofdnavigatie">
+  <button class="active" data-view="news"><span>▤</span><b>Nieuws</b></button>
+  <button data-view="live"><span>▶</span><b>Live</b></button>
+  <button data-view="competitions"><span>🏆</span><b>Competities</b></button>
+  <button data-view="myhandball"><span>★</span><b>Mijn handbal</b></button>
+  <button data-view="more"><span>•••</span><b>Meer</b></button>
 </nav>
 
-<script src="app.js?v=13.1.0"></script>
+<script src="app.js?v=2.0.0"></script>
 </body>
 </html>

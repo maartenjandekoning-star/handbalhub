@@ -1,174 +1,46 @@
-
-let DATA={catalog:[],teams:{},news:[],social:[],live:[],competitions:[]};
-let favorites=JSON.parse(localStorage.getItem("hh13_favorites")||"[]");
-let saved=JSON.parse(localStorage.getItem("hh13_saved")||"[]");
-let favoriteCompetitions=JSON.parse(localStorage.getItem("hh13_competitions")||"[]");
-let activeFilter="Alles";
-
-const $=s=>document.querySelector(s);
-const $$=s=>[...document.querySelectorAll(s)];
+let DATA={news:[],live:[],catalog:[],teams:{},competitions:[]};
+let activeFilter="Alles", visibleCount=12;
+let favorites=JSON.parse(localStorage.getItem("hh2_favorites")||"[]");
+let saved=JSON.parse(localStorage.getItem("hh2_saved")||"[]");
+let favoriteCompetitions=JSON.parse(localStorage.getItem("hh2_competitions")||"[]");
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>(s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const clean=s=>(s||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
-const fmt=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?"":d.toLocaleDateString("nl-NL",{day:"numeric",month:"short"})};
-
-function category(text=""){
-  const t=text.toLowerCase();
-  if(/teamnl|oranje|wk|ek|nederland/.test(t))return"TeamNL";
-  if(/transfer|contract|versterk/.test(t))return"Transfers";
-  if(/shl|super handball/.test(t))return"SHL";
-  if(/jeugd|u17|u18|u19|u20/.test(t))return"Jeugd";
-  if(/beach/.test(t))return"Beach";
-  if(/beker|competitie|programma|uitslag/.test(t))return"Competitie";
-  return"Algemeen";
-}
-function editorial(n){
-  let s=clean(n.summary)||n.title;
-  if(s.length>190)s=s.slice(0,187)+"…";
-  return s;
-}
-function show(id){
-  $$(".view").forEach(v=>v.classList.toggle("active",v.id===id));
-  $$(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
-  window.scrollTo({top:0,behavior:"instant"});
-  if(id==="teams")renderTeams();
-  if(id==="competitions")renderCompetitions();
-  if(id==="live")renderLive();
-  if(id==="more")renderSaved();
-}
-function toggleSave(url){
-  saved=saved.includes(url)?saved.filter(x=>x!==url):[...saved,url];
-  localStorage.setItem("hh13_saved",JSON.stringify(saved));
-  renderNews(); renderSaved();
-}
-function toggleFav(id){
-  favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];
-  localStorage.setItem("hh13_favorites",JSON.stringify(favorites));
-  renderTeams();
-}
-function toggleCompetition(id){
-  favoriteCompetitions=favoriteCompetitions.includes(id)?favoriteCompetitions.filter(x=>x!==id):[...favoriteCompetitions,id];
-  localStorage.setItem("hh13_competitions",JSON.stringify(favoriteCompetitions));
-  renderCompetitions();
-}
-function articleCard(n){
-  const image=n.image?`<img src="${esc(n.image)}" alt="" loading="lazy" onerror="this.remove()">`:"";
-  return `<article class="card news-card" data-url="${esc(n.url)}">
-    <div class="news-image">${image}<span>${esc(n.source||"Handbalnieuws")}</span></div>
-    <div class="news-body">
-      <div class="meta">${fmt(n.date)} · ${esc(n.category||category(n.title+" "+n.summary))}</div>
-      <h3>${esc(n.title)}</h3>
-      <p>${esc(editorial(n))}</p>
-      <div class="news-actions">
-        <a class="link article-link" href="${esc(n.url)}" target="_blank" rel="noopener">Lees artikel →</a>
-        <button class="save" data-save="${esc(n.url)}" aria-label="Opslaan">${saved.includes(n.url)?"♥":"♡"}</button>
-      </div>
-    </div>
-  </article>`;
-}
-function validNews(){
-  return (DATA.news||[]).filter(n=>n&&n.title&&n.url);
-}
-function renderHeader(){
-  const news=validNews();
-  $("#nNews").textContent=news.length;
-  $("#nSources").textContent=new Set(news.map(n=>n.source).filter(Boolean)).size;
-  $("#nLive").textContent=(DATA.live||[]).length;
-  const updated=DATA.updatedAt?new Date(DATA.updatedAt):null;
-  $("#updatedText").textContent=updated&&!Number.isNaN(updated.getTime())
-    ?`Bijgewerkt ${updated.toLocaleDateString("nl-NL",{day:"numeric",month:"long"})} om ${updated.toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})}`
-    :"De nieuwste berichten worden automatisch opgehaald";
-}
-function renderFilters(){
-  const categories=["Alles",...new Set(validNews().map(n=>n.category||category(n.title+" "+n.summary)))];
-  $("#newsFilters").innerHTML=categories.map(c=>`<button class="filter ${activeFilter===c?"active":""}" data-filter="${esc(c)}">${esc(c)}</button>`).join("");
-}
+const clean=s=>(s||"").replace(/<script[\s\S]*?<\/script>/gi," ").replace(/<style[\s\S]*?<\/style>/gi," ").replace(/<[^>]+>/g," ").replace(/&nbsp;|&#160;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim();
+const fmt=d=>{const x=new Date(d);return Number.isNaN(x.getTime())?"":x.toLocaleDateString("nl-NL",{day:"numeric",month:"short"})};
+function category(t=""){t=t.toLowerCase();if(/teamnl|oranje|nederland|wk|ek/.test(t))return"TeamNL";if(/transfer|contract|versterk/.test(t))return"Transfers";if(/shl|super handball/.test(t))return"SHL";if(/jeugd|u17|u18|u19|u20/.test(t))return"Jeugd";if(/beach/.test(t))return"Beach";if(/beker|competitie|programma|uitslag/.test(t))return"Competitie";return"Algemeen"}
+function news(){return (DATA.news||[]).filter(n=>n?.title&&n?.url).map(n=>({...n,summary:clean(n.summary),category:n.category&&n.category!=="Nieuws"?n.category:category(n.title+" "+n.summary)}))}
+function iconFor(c){return({TeamNL:"🇳🇱",Transfers:"↔️",SHL:"🏆",Jeugd:"🤾",Beach:"🌴",Competitie:"📅",Algemeen:"📰"})[c]||"📰"}
+function show(id){$$(".view").forEach(x=>x.classList.toggle("active",x.id===id));$$(".bottom-nav button").forEach(x=>x.classList.toggle("active",x.dataset.view===id));scrollTo({top:0,behavior:"instant"});if(id==="live")renderLive();if(id==="competitions")renderCompetitions();if(id==="myhandball")renderMyHandball()}
+function hero(n){if(!n)return"";return`${n.image?`<img src="${esc(n.image)}" alt="" onerror="this.remove()">`:""}<div class="hero-copy"><span class="tag">${esc(n.category)}</span><h2>${esc(n.title)}</h2><p>${esc((n.summary||"").slice(0,180))}</p><a class="source-link" href="${esc(n.url)}" target="_blank" rel="noopener">Lees het verhaal →</a></div>`}
+function row(n){return`<article class="news-row"><div class="news-thumb ${n.image?"":"no-image"}">${n.image?`<img src="${esc(n.image)}" alt="" loading="lazy" onerror="this.parentElement.classList.add('no-image');this.remove()">`:`${esc(n.source||"HandbalHub")}`}</div><div class="news-info"><div class="news-meta">${fmt(n.date)} · ${esc(n.category)} · ${esc(n.source||"")}</div><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><div class="news-actions"><a class="source-link" href="${esc(n.url)}" target="_blank" rel="noopener">Lees verder →</a><button class="save-btn" data-save="${esc(n.url)}">${saved.includes(n.url)?"♥":"♡"}</button></div></div></article>`}
 function renderNews(){
-  const q=($("#newsSearch")?.value||"").toLowerCase();
-  let list=validNews().map(n=>({...n,category:n.category||category(n.title+" "+n.summary)}));
-  if(activeFilter!=="Alles")list=list.filter(n=>n.category===activeFilter);
-  if(q)list=list.filter(n=>(n.title+" "+n.summary+" "+n.source).toLowerCase().includes(q));
-  $("#allNews").innerHTML=list.map(articleCard).join("");
-  $("#newsStatus").style.display=list.length?"none":"block";
-  $("#newsStatus").textContent=validNews().length
-    ?"Geen berichten gevonden binnen deze selectie."
-    :"Nog geen actuele berichten beschikbaar. De GitHub-update vult deze pagina automatisch.";
-  renderHeader();
-  renderFilters();
+ const all=news(),q=($("#newsSearch").value||"").toLowerCase();
+ $("#loadingState").hidden=true;
+ if(!all.length){$("#newsContent").hidden=true;$("#emptyState").hidden=false;return}
+ $("#emptyState").hidden=true;$("#newsContent").hidden=false;
+ $("#heroStory").innerHTML=hero(all[0]);
+ $("#todayLabel").textContent=new Date().toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"});
+ $("#todayList").innerHTML=all.slice(0,4).map(n=>`<a class="today-item" href="${esc(n.url)}" target="_blank"><span class="today-icon">${iconFor(n.category)}</span><span><b>${esc(n.title)}</b><small>${esc(n.source||n.category)}</small></span><span>›</span></a>`).join("");
+ const cats=["Alles",...new Set(all.map(n=>n.category))];
+ $("#newsFilters").innerHTML=cats.map(c=>`<button class="filter ${activeFilter===c?"active":""}" data-filter="${esc(c)}">${esc(c)}</button>`).join("");
+ let list=all.slice(1);
+ if(activeFilter!=="Alles")list=list.filter(n=>n.category===activeFilter);
+ if(q)list=list.filter(n=>(n.title+" "+n.summary+" "+n.source).toLowerCase().includes(q));
+ $("#resultCount").textContent=`${list.length} berichten`;
+ $("#newsFeed").innerHTML=list.slice(0,visibleCount).map(row).join("");
+ $("#loadMore").hidden=list.length<=visibleCount;
+ const u=DATA.updatedAt?new Date(DATA.updatedAt):null;
+ $("#updatedText").textContent=u&&!isNaN(u)?`Bijgewerkt ${u.toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})}`:`${all.length} actuele berichten`;
 }
-function renderTeams(){
-  const q=($("#teamSearch")?.value||"").toLowerCase();
-  const list=(DATA.catalog||[]).filter(t=>!q||(t.club+" "+t.team+" "+t.competition).toLowerCase().includes(q));
-  $("#catalog").innerHTML=list.map(t=>`<div class="status-row">
-    <div><b>${esc(t.club)} ${esc(t.team)}</b><div class="meta">${esc(t.competition)}</div></div>
-    <button class="btn secondary" data-fav="${esc(t.id)}">${favorites.includes(t.id)?"Ontvolgen":"Volgen"}</button>
-  </div>`).join("")||"<div class='empty'>Geen teams gevonden.</div>";
-}
-function competitionList(){
-  const base=DATA.competitions||[];
-  const fromCatalog=(DATA.catalog||[]).map(x=>({id:x.id,name:x.competition||x.club,sourceUrl:x.poolUrl||""}));
-  return [...new Map([...base,...fromCatalog].filter(x=>x.id&&x.name).map(x=>[x.id,x])).values()];
-}
-function renderCompetitions(){
-  const q=($("#competitionSearch")?.value||"").toLowerCase();
-  const list=competitionList().filter(c=>!q||c.name.toLowerCase().includes(q));
-  $("#competitionCatalog").innerHTML=list.map(c=>`<div class="status-row">
-    <div><b>${esc(c.name)}</b><div class="meta">${c.sourceUrl?"Bron gekoppeld":"Stand volgt automatisch"}</div></div>
-    <button class="btn secondary" data-comp="${esc(c.id)}">${favoriteCompetitions.includes(c.id)?"Gevolgd":"Volgen"}</button>
-  </div>`).join("")||"<div class='empty'>Geen competities gevonden.</div>";
-  $("#favoriteCompetitions").innerHTML=favoriteCompetitions.map(id=>list.find(x=>x.id===id)||competitionList().find(x=>x.id===id)).filter(Boolean).map(c=>`<div class="card competition-card"><h3>${esc(c.name)}</h3><p class="meta">Stand, programma en uitslagen verschijnen zodra de bron beschikbaar is.</p>${c.sourceUrl?`<a class="btn secondary" href="${esc(c.sourceUrl)}" target="_blank">Open bron</a>`:""}</div>`).join("")||"<div class='card empty'>Je volgt nog geen competities.</div>";
-}
-function renderLive(){
-  const list=DATA.live||[];
-  $("#liveList").innerHTML=list.length?list.map(x=>`<div class="status-row"><div><b>${esc(x.title)}</b><div class="meta">${esc(x.source||"Live")}</div></div><a class="btn" href="${esc(x.url)}" target="_blank">Open</a></div>`).join(""):`<div class="empty">Er is nu geen bevestigde livestream.<br><br><a class="btn secondary" href="https://superhandballeague.tv/live" target="_blank">Open SHL TV</a></div>`;
-}
-function renderSaved(){
-  const list=validNews().filter(n=>saved.includes(n.url));
-  $("#saved").innerHTML=list.map(articleCard).join("")||"<div class='empty'>Nog niets opgeslagen.</div>";
-}
+function toggleSave(url){saved=saved.includes(url)?saved.filter(x=>x!==url):[...saved,url];localStorage.setItem("hh2_saved",JSON.stringify(saved));renderNews();renderMyHandball()}
+function renderLive(){const l=DATA.live||[];$("#liveList").innerHTML=l.length?l.map(x=>`<div class="live-card"><div><span class="live-badge">LIVE</span><h3>${esc(x.title)}</h3><small>${esc(x.source||"Livestream")}</small></div><a class="primary-button" href="${esc(x.url)}" target="_blank">Kijken</a></div>`).join(""):`<div class="glass-card"><h3>Geen bevestigde livestream</h3><p>Nieuwe uitzendingen verschijnen hier automatisch.</p><a class="secondary-button" href="https://superhandballeague.tv/live" target="_blank">Open SHL TV</a></div>`}
+function compList(){return[...new Map([...(DATA.competitions||[]),...(DATA.catalog||[]).map(x=>({id:x.id,name:x.competition||x.club,sourceUrl:x.poolUrl||""}))].filter(x=>x.id&&x.name).map(x=>[x.id,x])).values()]}
+function renderCompetitions(){const q=($("#competitionSearch").value||"").toLowerCase(),list=compList().filter(x=>!q||x.name.toLowerCase().includes(q));$("#competitionCatalog").innerHTML=list.map(c=>`<div class="status-row"><div><b>${esc(c.name)}</b><small>${c.sourceUrl?"Standbron gekoppeld":"Stand volgt zodra de bron beschikbaar is"}</small></div><button class="secondary-button" data-comp="${esc(c.id)}">${favoriteCompetitions.includes(c.id)?"Gevolgd":"Volgen"}</button></div>`).join("");$("#favoriteCompetitions").innerHTML=favoriteCompetitions.map(id=>compList().find(x=>x.id===id)).filter(Boolean).map(c=>`<div class="competition-card"><h3>${esc(c.name)}</h3><p>Stand, programma en uitslagen staan uitsluitend hier, niet op de nieuwspagina.</p>${c.sourceUrl?`<a class="secondary-button" href="${esc(c.sourceUrl)}" target="_blank">Bekijk competitie</a>`:""}</div>`).join("")}
+function renderMyHandball(){const q=($("#teamSearch").value||"").toLowerCase(),list=(DATA.catalog||[]).filter(t=>!q||(t.club+" "+t.team+" "+t.competition).toLowerCase().includes(q));$("#teamCatalog").innerHTML=list.map(t=>`<div class="status-row"><div><b>${esc(t.club)} ${esc(t.team)}</b><small>${esc(t.competition)}</small></div><button class="secondary-button" data-fav="${esc(t.id)}">${favorites.includes(t.id)?"Ontvolgen":"Volgen"}</button></div>`).join("");const sn=news().filter(n=>saved.includes(n.url));$("#savedNews").innerHTML=sn.length?sn.map(row).join(""):`<div class="glass-card"><p>Nog geen artikelen opgeslagen.</p></div>`}
 async function boot(){
-  // Remove obsolete caches/service workers once so old JS cannot block taps.
-  try{
-    const marker=localStorage.getItem("hh13_1_cache_reset");
-    if(!marker&&"serviceWorker" in navigator){
-      const regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r=>r.unregister()));
-      const keys=await caches.keys();
-      await Promise.all(keys.map(k=>caches.delete(k)));
-      localStorage.setItem("hh13_1_cache_reset","1");
-    }
-  }catch{}
-
-  try{
-    DATA=await fetch(`app-data.json?v=${Date.now()}`,{cache:"no-store"}).then(r=>{
-      if(!r.ok)throw new Error("data");
-      return r.json();
-    });
-  }catch{}
-
-  // Never replace a larger server feed with an old 3-item local cache.
-  const cached=JSON.parse(localStorage.getItem("hh13_news")||"null");
-  if(Array.isArray(cached)&&cached.length>(DATA.news||[]).length)DATA.news=cached;
-  if((DATA.news||[]).length)localStorage.setItem("hh13_news",JSON.stringify(DATA.news));
-
-  renderNews(); renderTeams(); renderCompetitions(); renderLive(); renderSaved();
+ try{const regs=await navigator.serviceWorker?.getRegistrations?.()||[];for(const r of regs)await r.unregister();const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)))}catch{}
+ try{DATA=await fetch(`app-data.json?v=${Date.now()}`,{cache:"no-store"}).then(r=>r.json())}catch{}
+ renderNews();
 }
-
-document.addEventListener("click",e=>{
-  const nav=e.target.closest("[data-view]");
-  if(nav){e.preventDefault();show(nav.dataset.view);return}
-  const go=e.target.closest("[data-go]");
-  if(go){e.preventDefault();show(go.dataset.go);return}
-  const filter=e.target.closest("[data-filter]");
-  if(filter){activeFilter=filter.dataset.filter;renderNews();return}
-  const save=e.target.closest("[data-save]");
-  if(save){e.preventDefault();e.stopPropagation();toggleSave(save.dataset.save);return}
-  const fav=e.target.closest("[data-fav]");
-  if(fav){toggleFav(fav.dataset.fav);return}
-  const comp=e.target.closest("[data-comp]");
-  if(comp){toggleCompetition(comp.dataset.comp);return}
-});
-$("#newsSearch").addEventListener("input",renderNews);
-$("#teamSearch").addEventListener("input",renderTeams);
-$("#competitionSearch").addEventListener("input",renderCompetitions);
-$("#refreshButton").addEventListener("click",()=>location.reload());
-boot();
+document.addEventListener("click",e=>{const v=e.target.closest("[data-view]");if(v){show(v.dataset.view);return}const f=e.target.closest("[data-filter]");if(f){activeFilter=f.dataset.filter;visibleCount=12;renderNews();return}const s=e.target.closest("[data-save]");if(s){e.preventDefault();toggleSave(s.dataset.save);return}const fav=e.target.closest("[data-fav]");if(fav){favorites=favorites.includes(fav.dataset.fav)?favorites.filter(x=>x!==fav.dataset.fav):[...favorites,fav.dataset.fav];localStorage.setItem("hh2_favorites",JSON.stringify(favorites));renderMyHandball();return}const c=e.target.closest("[data-comp]");if(c){favoriteCompetitions=favoriteCompetitions.includes(c.dataset.comp)?favoriteCompetitions.filter(x=>x!==c.dataset.comp):[...favoriteCompetitions,c.dataset.comp];localStorage.setItem("hh2_competitions",JSON.stringify(favoriteCompetitions));renderCompetitions();return}})
+$("#newsSearch").addEventListener("input",()=>{visibleCount=12;renderNews()});$("#competitionSearch").addEventListener("input",renderCompetitions);$("#teamSearch").addEventListener("input",renderMyHandball);$("#loadMore").addEventListener("click",()=>{visibleCount+=12;renderNews()});$("#refreshButton").addEventListener("click",()=>location.reload());$("#emptyRefresh").addEventListener("click",()=>location.reload());boot();

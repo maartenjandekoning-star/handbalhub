@@ -1,13 +1,20 @@
-# HandbalHub 13.1 — nieuws als startpagina
+# HandbalHub 2.0 — Midnight Arena
 
-Herstelversie voor:
-- niet reagerende knoppen/navigatie;
-- oude service-worker-cache;
-- terugval naar een lokaal cachebestand met slechts drie artikelen;
-- een te drukke homepagina.
+Volledige visuele redesign in de stijl van het nieuwe HandbalHub-logo.
 
-De app start nu direct op de volledige nieuwspagina. Navigatie gebruikt centrale event delegation en is daardoor robuuster op iPad/Safari.
+## Belangrijkste keuzes
 
-De app kiest altijd de grootste beschikbare nieuwsfeed en vervangt actuele serverdata nooit meer door een oude lokale 3-artikelen-cache.
+- Nieuws is de startpagina.
+- Standen staan uitsluitend onder Competities en Mijn handbal.
+- Eén groot hoofdverhaal en daarna een compacte verticale nieuwsflow.
+- Vandaag in het handbal staat direct boven de nieuwsfeed.
+- Premium kleuren: diep nachtblauw, energiek oranje, wit en lichtgrijs.
+- Nieuw logo, PWA-icoon en merkbeeld.
+- Robuuste navigatie voor iPad en iPhone.
+- HTML wordt uit samenvattingen verwijderd.
 
-Upload de zichtbare bestanden zoals gebruikelijk. Laat `.github/workflows/main.yml` staan.
+## Uploaden
+
+Upload alle zichtbare bestanden naar de hoofdmap van je GitHub-repository. Laat de bestaande `.github/workflows/main.yml` staan.
+
+Na deployment de pagina één keer volledig vernieuwen. De nieuwe versie wist oude service-worker-caches automatisch.
