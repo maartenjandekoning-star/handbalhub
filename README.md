@@ -1,20 +1,18 @@
-# HandbalHub 2.0 — Midnight Arena
+# HandbalHub 2.0.1 — direct nieuws
 
-Volledige visuele redesign in de stijl van het nieuwe HandbalHub-logo.
+Deze herstelversie lost de trage lege startpagina op.
 
-## Belangrijkste keuzes
+## Nieuwe laadstrategie
 
-- Nieuws is de startpagina.
-- Standen staan uitsluitend onder Competities en Mijn handbal.
-- Eén groot hoofdverhaal en daarna een compacte verticale nieuwsflow.
-- Vandaag in het handbal staat direct boven de nieuwsfeed.
-- Premium kleuren: diep nachtblauw, energiek oranje, wit en lichtgrijs.
-- Nieuw logo, PWA-icoon en merkbeeld.
-- Robuuste navigatie voor iPad en iPhone.
-- HTML wordt uit samenvattingen verwijderd.
+1. Laatst bekende nieuwsberichten worden direct uit het apparaat geladen.
+2. De pagina wordt onmiddellijk zichtbaar.
+3. `app-data.json` wordt daarna op de achtergrond vernieuwd.
+4. Een tijdelijk leeg bestand mag bestaande nieuwsberichten nooit meer wissen.
+5. De browsercache wordt niet meer bij iedere opening verwijderd.
+6. De service worker bewaart de laatst succesvolle nieuwsdata.
+
+Hierdoor hoeft de gebruiker niet te wachten tot GitHub Actions opnieuw nieuws heeft opgehaald.
 
 ## Uploaden
 
-Upload alle zichtbare bestanden naar de hoofdmap van je GitHub-repository. Laat de bestaande `.github/workflows/main.yml` staan.
-
-Na deployment de pagina één keer volledig vernieuwen. De nieuwe versie wist oude service-worker-caches automatisch.
+Upload de zichtbare bestanden naar de hoofdmap van de repository. Laat `.github/workflows/main.yml` ongewijzigd staan.
