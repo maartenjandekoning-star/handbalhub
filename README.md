@@ -1,12 +1,19 @@
-# HandbalHub 6.3 – correcte nieuwsdatums
+# HandbalHub 6.4
 
-Gerichte reparatie van de nieuwsdatums.
+Gerichte verbeteringen bovenop 6.3:
 
-- De ophaaltijd wordt nooit meer als publicatiedatum gebruikt.
-- RSS/Atom gebruikt pubDate, published, updated of dc:date.
-- Handbal Startpunt HTML-fallback probeert de echte datum uit time/datePublished te halen.
-- Zonder betrouwbare datum staat er 'Datum onbekend'.
-- Artikelen zonder datum komen niet in 'In het nieuws vandaag' of 'Laatste 7 dagen'.
-- 'In het nieuws vandaag' gebruikt alleen betrouwbaar gedateerde berichten van circa de laatste 24 uur.
-- Oud/ongedateerd nieuws blijft beschikbaar onder ouder nieuws.
-- De competitieverbeteringen van 6.2 blijven behouden.
+## In het nieuws vandaag
+- dubbele artikelen over hetzelfde onderwerp worden samengevoegd;
+- kleine titelverschillen tellen ook als hetzelfde onderwerp;
+- Handbal Inside krijgt bij dubbele berichtgeving de hoogste bronvoorkeur;
+- daarna volgen Handbal.nl, Handbal Startpunt en andere directe bronnen;
+- Google Nieuws is alleen laatste voorkeur;
+- eventueel verschijnt compact 'ook: ...' bij andere bronnen.
+
+## Competities
+- de echte poule-/competitienaam wordt uit de Handbal.nl-pagina gehaald;
+- 'Poule Coinmerce SHL Men' wordt bijvoorbeeld 'Coinmerce SHL Men';
+- breadcrumbs worden als extra bron voor de naam gebruikt;
+- generieke titels als 'Competitie - poule' worden zoveel mogelijk vermeden.
+
+De nieuwsengine, datumfix, Live-tab en overige functionaliteit zijn verder niet aangepast.

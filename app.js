@@ -126,6 +126,69 @@ function dedupe(arr){
 function card(x){
  return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"><a data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank" rel="noopener">Open originele bron →</a><button data-save="${esc(x.url)}">${saved.includes(x.url)?"♥":"♡"}</button></div></article>`
 }
+
+function normalizeTopicText(value=""){
+ return value.toLowerCase()
+   .replace(/[-–—:|]/g," ")
+   .replace(/[“”‘’'"`]/g,"")
+   .replace(/\b(handbal\.nl|handbal inside|handbal startpunt|google nieuws|nos sport|nu\.nl sport)\b/g," ")
+   .replace(/\b(wedstrijdblog|liveblog|update|nieuws|handbal)\b/g," ")
+   .replace(/\b(de|het|een|en|van|voor|op|in|met|naar|bij|uit|om|te|is|zijn|wordt|werd)\b/g," ")
+   .replace(/\s+/g," ")
+   .trim();
+}
+
+function topicWords(x){
+ return new Set(normalizeTopicText(`${x.title} ${x.summary||""}`)
+   .split(" ")
+   .filter(w=>w.length>=4)
+   .slice(0,18));
+}
+
+function topicSimilarity(a,b){
+ const A=topicWords(a),B=topicWords(b);
+ if(!A.size||!B.size)return 0;
+ let overlap=0;
+ A.forEach(w=>{if(B.has(w))overlap++});
+ return overlap/Math.min(A.size,B.size);
+}
+
+function sourcePreference(x){
+ const s=(x.source||"").toLowerCase();
+ if(s.includes("handbal inside"))return 100;
+ if(s.includes("handbal.nl"))return 90;
+ if(s.includes("handbal startpunt"))return 80;
+ if(s.includes("super handball"))return 75;
+ if(s.includes("handbaloost"))return 70;
+ if(s.includes("groot hellevoet"))return 65;
+ if(s.includes("nos"))return 60;
+ if(s.includes("nu.nl"))return 55;
+ if(s.includes("google nieuws"))return 10;
+ return 40;
+}
+
+function dedupeTopics(list){
+ const groups=[];
+ for(const item of list){
+   let match=null;
+   for(const g of groups){
+     if(topicSimilarity(item,g.best)>=0.58){
+       match=g;break;
+     }
+   }
+   if(!match){
+     groups.push({best:item,alternatives:[]});
+   }else{
+     match.alternatives.push(item);
+     if(sourcePreference(item)>sourcePreference(match.best)){
+       match.alternatives.push(match.best);
+       match.best=item;
+     }
+   }
+ }
+ return groups.map(g=>({...g.best,alsoPublished:g.alternatives.map(x=>x.source).filter(Boolean)}));
+}
+
 function personalScore(x){
  let score=Math.max(0,14-daysAgo(x.date))*2;
  score+=(interest[x.category]||0)*5+(interest[x.source]||0)*3;
@@ -136,15 +199,32 @@ function personalScore(x){
 }
 function renderToday(){
  const recent=items.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1);
- let pool=(recent.length>=4?recent:items.slice(0,20)).slice();
- // Balance personal relevance with variety
- pool.sort((a,b)=>personalScore(b)-personalScore(a)||new Date(b.date)-new Date(a.date));
+ let pool=(recent.length>=4?recent:items.filter(hasReliableDate).slice(0,30)).slice();
+
+ // Eerst onderwerp-deduplicatie, daarna persoonlijke prioriteit.
+ pool=dedupeTopics(pool);
+ pool.sort((a,b)=>personalScore(b)-personalScore(a)||sourcePreference(b)-sourcePreference(a)||new Date(b.date)-new Date(a.date));
+
  const chosen=[],seenCats=new Set();
  for(const x of pool){
    if(chosen.length>=6)break;
-   if(!seenCats.has(x.category)||chosen.length>=4){chosen.push(x);seenCats.add(x.category)}
+   if(!seenCats.has(x.category)||chosen.length>=4){
+     chosen.push(x);
+     seenCats.add(x.category);
+   }
  }
- $("#today").innerHTML=chosen.map((x,i)=>`<a class="today-link" data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank"><span>${["🔥","🇳🇱","🏆","📍","📰","🤾"][i]}</span><span><b>${esc(x.title)}</b><em>${esc(x.source)}</em></span><span>›</span></a>`).join("");
+
+ $("#today").innerHTML=chosen.map((x,i)=>{
+   const also=(x.alsoPublished||[]).filter(s=>s!==x.source);
+   return `<a class="today-link" data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank">
+     <span>${["🔥","🇳🇱","🏆","📍","📰","🤾"][i]}</span>
+     <span>
+       <b>${esc(x.title)}</b>
+       <em>${esc(x.source)}${also.length?` · ook: ${esc([...new Set(also)].slice(0,2).join(", "))}`:""}</em>
+     </span>
+     <span>›</span>
+   </a>`;
+ }).join("");
 }
 function renderStatus(){$("#sourceStatus").innerHTML=SOURCES.map(s=>`<span class="source-pill ${status[s.name]==="ok"?"ok":""}">${status[s.name]==="ok"?"●":"○"} ${esc(s.name)}</span>`).join("")}
 function renderNews(){
@@ -196,10 +276,32 @@ async function fetchPoolSummary(url){
  const cleanText=s=>strip(s||"").replace(/\s+/g," ").trim();
 
  let title=cleanText(doc.querySelector("h1")?.textContent||"");
+
+ // Handbal.nl toont vaak "Poule Coinmerce SHL Men"; voor de kaart willen we de echte poulenaam.
+ if(title){
+   title=title
+     .replace(/^poule\s+/i,"")
+     .replace(/^competitie\s*[-–—]\s*poule\s*[-–—]?\s*/i,"")
+     .trim();
+ }
+
+ if(!title){
+   // Kijk ook naar breadcrumbs/navigatie, waar de klasse vaak expliciet staat.
+   const crumbs=[...doc.querySelectorAll("nav a, .breadcrumb a, .breadcrumbs a, [class*='breadcrumb'] a")]
+     .map(a=>cleanText(a.textContent))
+     .filter(Boolean);
+   const candidate=crumbs.reverse().find(t=>!/home|competities|categorie|klasse/i.test(t));
+   if(candidate) title=candidate;
+ }
+
  if(!title){
    const t=cleanText(doc.querySelector("title")?.textContent||"");
-   title=t.replace(/\s*[-|]\s*Handbal\.nl.*$/i,"").trim();
+   title=t
+     .replace(/\s*[-|]\s*Handbal\.nl.*$/i,"")
+     .replace(/^poule\s+/i,"")
+     .trim();
  }
+
  if(!title||title.length<4) title="Mijn competitie";
 
  const tables=[...doc.querySelectorAll("table")].map(table=>{
