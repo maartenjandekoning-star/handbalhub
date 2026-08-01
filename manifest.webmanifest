@@ -3,7 +3,7 @@
   "short_name": "HandbalHub",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#06192f",
+  "background_color": "#081729",
   "theme_color": "#06192f",
   "icons": [
     {

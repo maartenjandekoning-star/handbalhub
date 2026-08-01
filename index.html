@@ -8,67 +8,41 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=4.0.0">
-<title>HandbalHub 4.0</title>
+<link rel="stylesheet" href="styles.css?v=6.0">
+<title>HandbalHub</title>
 </head>
 <body>
 <div class="app">
 <header class="topbar">
   <div class="brand"><img src="icon-192.png" alt=""><div><b>HANDBAL<span>HUB</span></b><small>NEDERLAND</small></div></div>
-  <div class="top-actions"><button id="searchButton">⌕</button><button id="refreshButton">↻</button></div>
+  <div class="actions"><button id="searchBtn">⌕</button><button id="refreshBtn">↻</button></div>
 </header>
-<div id="searchPanel" class="search-panel" hidden><input id="searchInput" placeholder="Zoek in nieuws, bronnen en categorieën"></div>
+<div class="searchbar" id="searchbar" hidden><input id="searchInput" placeholder="Zoek club, speler, bron of onderwerp"></div>
 
 <main>
-<section id="news" class="view active">
-  <article class="today-card">
-    <div class="today-title"><div><small>📰 DAGOVERZICHT</small><h1>In het nieuws vandaag</h1></div><span id="updatedAt"></span></div>
-    <div id="todayHeadlines"></div>
+<section id="newsView">
+  <article class="today">
+    <small>📰 IN HET NIEUWS VANDAAG</small>
+    <div id="today"></div>
   </article>
-  <div class="chips" id="filters"></div>
-  <div id="timeline" class="timeline"></div>
+  <div class="source-status" id="sourceStatus"></div>
+  <div class="chips" id="chips"></div>
+  <div class="timeline" id="timeline"></div>
   <div id="sentinel"></div>
 </section>
-
-<section id="live" class="view">
-  <div class="page-title"><small>🔴 KIJK MEE</small><h1>Live & video</h1></div>
-  <div id="liveFeed" class="timeline"></div>
-</section>
-
-<section id="competitions" class="view">
-  <div class="page-title"><small>🏆 WEDSTRIJDDATA</small><h1>Competities</h1></div>
-  <div class="module-card"><h2>Standen, programma en uitslagen</h2><p>Deze module staat volledig los van de nieuwstijdlijn. Een storing hier heeft nooit invloed op het nieuws.</p><a href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">Open officiële competitiegegevens →</a></div>
-  <div id="competitionFeed"></div>
-</section>
-
-<section id="myhub" class="view">
-  <div class="page-title"><small>⭐ PERSOONLIJK</small><h1>Mijn Hub</h1></div>
-  <div class="module-card"><h2>Opgeslagen artikelen</h2><div id="savedFeed"></div></div>
-</section>
-
-<section id="more" class="view">
-  <div class="page-title"><small>☰ MEER</small><h1>Bronnen & instellingen</h1></div>
-  <div class="source-grid">
-    <a href="https://handbal.nl/" target="_blank">Handbal.nl</a>
-    <a href="https://www.handbalinside.nl/" target="_blank">Handbal Inside</a>
-    <a href="https://www.handbalstartpunt.nl/" target="_blank">Handbal Startpunt</a>
-    <a href="https://superhandballeague.com/" target="_blank">Super Handball League</a>
-    <a href="https://handbaloost.nl/" target="_blank">HandbalOost</a>
-    <a href="https://groothellevoet.nl/" target="_blank">Groot Hellevoet</a>
-    <a href="https://nos.nl/sport/handbal" target="_blank">NOS Sport</a>
-    <a href="https://www.nu.nl/sport" target="_blank">NU.nl Sport</a>
-  </div>
+<section id="savedView" hidden>
+  <div class="page-title"><small>★ MIJN HUB</small><h1>Opgeslagen</h1></div>
+  <div class="timeline" id="savedTimeline"></div>
 </section>
 </main>
 </div>
 
-<nav class="bottom-nav">
-<button class="active" data-view="news"><span>▤</span><b>Nieuws</b></button>
-<button data-view="live"><span>●</span><b>Live</b></button>
-<button data-view="competitions"><span>🏆</span><b>Competities</b></button>
-<button data-view="myhub"><span>★</span><b>Mijn Hub</b></button>
-<button data-view="more"><span>•••</span><b>Meer</b></button>
+<nav class="nav">
+<button class="active" data-tab="news">▤<small>Nieuws</small></button>
+<a href="https://superhandballeague.tv/live" target="_blank">●<small>Live</small></a>
+<a href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">🏆<small>Competities</small></a>
+<button data-tab="saved">★<small>Mijn Hub</small></button>
 </nav>
-<script src="app.js?v=4.0.0"></script>
+<script src="app.js?v=6.0"></script>
 </body>
 </html>

@@ -1,20 +1,30 @@
-# HandbalHub 4.0
+# HandbalHub 6.0 – V8 nieuwsengine
 
-Deze versie is opnieuw opgebouwd rond één doel: een tijdlijn die nooit leeg is.
+Dit is bewust weer de eenvoudige architectuur van de oude goedwerkende versies.
 
-## Kern
-- vaste bronnen;
-- Google Nieuws als aanvulling;
-- directe links naar originele bronnen;
-- compact ‘In het nieuws vandaag’;
-- één verticale sociale tijdlijn;
-- infinite scroll;
-- live- en socialkaarten tussen nieuws;
-- losse JSON-modules;
-- ingebouwde bronfeed als noodlaag;
-- eerdere succesvolle feed lokaal bewaard.
+## Kernbestanden
+- index.html
+- styles.css
+- app.js
+- manifest.webmanifest
+- service-worker.js
 
-## Upload
-Upload alle zichtbare bestanden naar de hoofdmap van de repository.
+Daarnaast alleen de twee PWA-iconen.
 
-Vervang daarna éénmalig de inhoud van `.github/workflows/main.yml` door `VERVANGENDE-WORKFLOW-TEKST.txt`.
+## Nieuwsengine
+Per RSS-bron probeert de app:
+1. RSS2JSON
+2. AllOrigins
+3. CorsProxy
+
+Handbal Startpunt krijgt een aparte HTML-uitlezer via dezelfde proxyfallbacks.
+
+De laatste succesvolle feed wordt in localStorage opgeslagen. De ingebouwde noodfeed is altijd direct zichtbaar.
+
+Geen GitHub Actions.
+Geen Node.
+Geen Playwright.
+Geen news.json.
+Geen submappen nodig.
+
+Upload alle bestanden rechtstreeks naar de hoofdmap van GitHub Pages.
