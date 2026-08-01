@@ -1,21 +1,12 @@
-# HandbalHub 6.1
+# HandbalHub 6.3 – correcte nieuwsdatums
 
-Gebouwd op de eenvoudige en werkende V8 RSS-engine.
+Gerichte reparatie van de nieuwsdatums.
 
-Nieuw:
-- TeamNL-categorisering veel strenger.
-- Privacy/cookie/contactpagina's uit de feed gefilterd.
-- Nieuws chronologisch gesplitst in Laatste 7 dagen en Ouder nieuws.
-- In het nieuws vandaag is een lokale persoonlijke selectie op basis van klikgedrag, actualiteit en spreiding.
-- Live is een eigen HandbalHub-tab met SHL TV en NOS en gevonden live/aankomende streamberichten.
-- Competities is een eigen tab met Handbal.nl en eigen poule-URL's.
-- Eigen poules worden lokaal opgeslagen en op verzoek via dezelfde eenvoudige proxytechniek samengevat.
-
-Nog steeds:
-- geen GitHub Actions
-- geen Node
-- geen Playwright
-- geen news.json
-- geen submappen nodig
-
-Upload alle bestanden rechtstreeks naar de hoofdmap van GitHub Pages.
+- De ophaaltijd wordt nooit meer als publicatiedatum gebruikt.
+- RSS/Atom gebruikt pubDate, published, updated of dc:date.
+- Handbal Startpunt HTML-fallback probeert de echte datum uit time/datePublished te halen.
+- Zonder betrouwbare datum staat er 'Datum onbekend'.
+- Artikelen zonder datum komen niet in 'In het nieuws vandaag' of 'Laatste 7 dagen'.
+- 'In het nieuws vandaag' gebruikt alleen betrouwbaar gedateerde berichten van circa de laatste 24 uur.
+- Oud/ongedateerd nieuws blijft beschikbaar onder ouder nieuws.
+- De competitieverbeteringen van 6.2 blijven behouden.

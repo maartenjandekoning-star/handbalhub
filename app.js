@@ -25,8 +25,17 @@ let status={};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>(s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return(d.textContent||"").replace(/\s+/g," ").trim()};
-const fmt=d=>{const x=new Date(d);return isNaN(x)?"":x.toLocaleString("nl-NL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})};
-const daysAgo=d=>(Date.now()-new Date(d).getTime())/86400000;
+function validNewsDate(value){
+ if(!value) return "";
+ const d=new Date(value);
+ if(isNaN(d.getTime())) return "";
+ // reject implausible future dates; never replace missing dates with fetch time
+ if(d.getTime()>Date.now()+12*60*60*1000) return "";
+ return d.toISOString();
+}
+const hasReliableDate=x=>!!x.date&&!isNaN(new Date(x.date).getTime());
+const fmt=d=>{if(!d)return "Datum onbekend";const x=new Date(d);return isNaN(x)?"Datum onbekend":x.toLocaleString("nl-NL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})};
+const daysAgo=d=>{if(!d)return Infinity;const t=new Date(d).getTime();return isNaN(t)?Infinity:(Date.now()-t)/86400000};
 
 function category(t=""){
  t=t.toLowerCase();
@@ -47,7 +56,7 @@ function imageFromHtml(html=""){const m=html.match(/<img[^>]+(?:src|data-src)=["
 function normalize(it,source){
  let image=it.thumbnail||it.enclosure?.link||it.enclosure?.thumbnail||imageFromHtml(it.description||it.content||"");
  let title=strip(it.title),summary=strip(it.description||it.content).slice(0,300);
- return {title,summary,source,category:category(title+" "+summary),date:it.pubDate||it.date||new Date().toISOString(),url:it.link||it.url,image};
+ return {title,summary,source,category:category(title+" "+summary),date:validNewsDate(it.pubDate||it.published||it.updated||it["dc:date"]||it.date),url:it.link||it.url,image};
 }
 async function withTimeout(p,ms=9000){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))])}
 async function rss2json(feed,source){
@@ -60,7 +69,7 @@ function parseXml(xml,source){
  const doc=new DOMParser().parseFromString(xml,"text/xml");
  return [...doc.querySelectorAll("item")].map(n=>{
    const get=t=>n.querySelector(t)?.textContent?.trim()||"";
-   return normalize({title:get("title"),link:get("link"),pubDate:get("pubDate"),description:get("description"),content:get("content\\:encoded")},source);
+   return normalize({title:get("title"),link:get("link"),pubDate:get("pubDate")||get("published")||get("updated")||get("dc\\:date"),description:get("description"),content:get("content\\:encoded")},source);
  }).filter(x=>x.title&&x.url&&!excluded(x.title));
 }
 async function proxyText(url,proxy){
@@ -88,7 +97,13 @@ function startpuntFromHtml(html){
    const box=a.closest("article,li")||a.parentElement;
    const summary=strip(box?.querySelector("p")?.textContent||"").slice(0,300);
    const image=box?.querySelector("img")?.src||"";
-   out.push({title,summary,source:"Handbal Startpunt",category:category(title+" "+summary),date:new Date().toISOString(),url,image});
+   const rawDate=
+      a.querySelector("time")?.getAttribute("datetime")||
+      a.querySelector("time")?.textContent||
+      a.querySelector('[itemprop="datePublished"]')?.getAttribute("content")||
+      a.querySelector('[itemprop="datePublished"]')?.getAttribute("datetime")||
+      "";
+   out.push({title,summary,source:"Handbal Startpunt",category:category(title+" "+summary),date:validNewsDate(rawDate),url,image});
  });
  return [...new Map(out.map(x=>[x.url,x])).values()].slice(0,20);
 }
@@ -106,7 +121,7 @@ function dedupe(arr){
    const key=(x.url.replace(/[?#].*$/,"").replace(/\/$/,"")||x.title.toLowerCase());
    if(!map.has(key))map.set(key,x);
  }
- return [...map.values()].sort((a,b)=>new Date(b.date)-new Date(a.date));
+ return [...map.values()].sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
 }
 function card(x){
  return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"><a data-open="${esc(x.url)}" href="${esc(x.url)}" target="_blank" rel="noopener">Open originele bron →</a><button data-save="${esc(x.url)}">${saved.includes(x.url)?"♥":"♡"}</button></div></article>`
@@ -120,7 +135,7 @@ function personalScore(x){
  return score;
 }
 function renderToday(){
- const recent=items.filter(x=>daysAgo(x.date)<=2);
+ const recent=items.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=1);
  let pool=(recent.length>=4?recent:items.slice(0,20)).slice();
  // Balance personal relevance with variety
  pool.sort((a,b)=>personalScore(b)-personalScore(a)||new Date(b.date)-new Date(a.date));
@@ -134,11 +149,11 @@ function renderToday(){
 function renderStatus(){$("#sourceStatus").innerHTML=SOURCES.map(s=>`<span class="source-pill ${status[s.name]==="ok"?"ok":""}">${status[s.name]==="ok"?"●":"○"} ${esc(s.name)}</span>`).join("")}
 function renderNews(){
  const q=($("#searchInput").value||"").toLowerCase();
- let list=items.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+ let list=items.slice().sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
  if(filter!=="Alles")list=list.filter(x=>x.category===filter);
  if(q)list=list.filter(x=>(x.title+" "+x.summary+" "+x.source).toLowerCase().includes(q));
- const recent=list.filter(x=>daysAgo(x.date)<=7);
- const older=list.filter(x=>daysAgo(x.date)>7);
+ const recent=list.filter(x=>hasReliableDate(x)&&daysAgo(x.date)>=-0.5&&daysAgo(x.date)<=7);
+ const older=list.filter(x=>!hasReliableDate(x)||daysAgo(x.date)>7);
  $("#recentTimeline").innerHTML=recent.map(card).join("")||`<div class="empty">Geen berichten binnen dit filter in de laatste 7 dagen.</div>`;
  $("#olderTimeline").innerHTML=older.slice(0,olderVisible).map(card).join("")||`<div class="empty">Geen ouder nieuws binnen dit filter.</div>`;
  $("#recentCount").textContent=`${recent.length} berichten`;
@@ -176,16 +191,94 @@ async function fetchPoolSummary(url){
    try{html=await proxyText(url,proxy);if(html)break}catch{}
  }
  if(!html)throw new Error("Poule niet bereikbaar");
+
  const doc=new DOMParser().parseFromString(html,"text/html");
- const title=strip(doc.querySelector("h1")?.textContent||doc.querySelector("title")?.textContent||"Handbal.nl poule");
- const rows=[...doc.querySelectorAll("table tr")].map(tr=>strip(tr.textContent)).filter(x=>x.length>4&&x.length<160).slice(0,12);
- const headings=[...doc.querySelectorAll("h2,h3")].map(x=>strip(x.textContent)).filter(Boolean).slice(0,5);
- const summaryParts=[];
- if(rows.length)summaryParts.push(`Er zijn ${rows.length} zichtbare stand- of wedstrijdregels gevonden.`);
- if(headings.length)summaryParts.push(`Onderdelen: ${headings.join(", ")}.`);
- if(!summaryParts.length)summaryParts.push("HandbalHub heeft de poule gevonden. Open de officiële pagina voor de volledige gegevens.");
- return {title,summary:summaryParts.join(" "),rows:rows.slice(0,6),updated:new Date().toISOString()};
+ const cleanText=s=>strip(s||"").replace(/\s+/g," ").trim();
+
+ let title=cleanText(doc.querySelector("h1")?.textContent||"");
+ if(!title){
+   const t=cleanText(doc.querySelector("title")?.textContent||"");
+   title=t.replace(/\s*[-|]\s*Handbal\.nl.*$/i,"").trim();
+ }
+ if(!title||title.length<4) title="Mijn competitie";
+
+ const tables=[...doc.querySelectorAll("table")].map(table=>{
+   const rows=[...table.querySelectorAll("tr")].map(tr=>
+     [...tr.querySelectorAll("th,td")].map(td=>cleanText(td.textContent)).filter(Boolean)
+   ).filter(r=>r.length);
+   return {rows,text:rows.flat().join(" ").toLowerCase()};
+ });
+
+ const standingsTable=tables.find(t=>/gespeeld|punten|saldo|gewonnen|verloren/.test(t.text));
+ const fixturesTable=tables.find(t=>/datum/.test(t.text)&&/thuis/.test(t.text)&&/uit/.test(t.text));
+ const resultsTable=tables.find(t=>/uitslag/.test(t.text)&&/thuis/.test(t.text)&&/uit/.test(t.text)) || fixturesTable;
+
+ function parseStandings(table){
+   if(!table) return [];
+   const out=[];
+   for(const r of table.rows){
+     const txt=r.join(" ").toLowerCase();
+     if(/stand team gespeeld punten|gespeeld punten gewonnen|positie team/.test(txt)) continue;
+     if(r.length<3) continue;
+     let pos="",team="",played="",points="";
+     if(/^\d+$/.test(r[0]) && r.length>=4){pos=r[0];team=r[1];played=r[2];points=r[3]}
+     else if(r.length>=3){team=r[0];played=r[1];points=r[2]}
+     if(!team || /team|stand/i.test(team)) continue;
+     if(!/\d/.test(played+" "+points)) continue;
+     out.push({pos,team,played,points});
+     if(out.length>=6) break;
+   }
+   return out;
+ }
+
+ function parseMatches(table){
+   if(!table) return [];
+   const out=[];
+   for(const r of table.rows){
+     const txt=r.join(" ").toLowerCase();
+     if(/datum tijd thuis uit|datum.*thuis.*uit.*uitslag|stand team gespeeld punten/.test(txt)) continue;
+     if(r.length<3) continue;
+
+     let date="",time="",home="",away="",score="";
+     if(r.length>=5){[date,time,home,away,score]=[r[0],r[1],r[2],r[3],r[4]]}
+     else if(r.length===4){[date,home,away,score]=r}
+     else {[home,away,score]=r}
+
+     if(!home||!away) continue;
+     if(/datum|tijd|thuis|uit|uitslag/i.test(home+" "+away)) continue;
+     out.push({date,time,home,away,score});
+     if(out.length>=10) break;
+   }
+   return out;
+ }
+
+ const standings=parseStandings(standingsTable);
+ const matches=parseMatches(resultsTable);
+ const played=matches.filter(m=>m.score&&/\d/.test(m.score));
+ const upcoming=matches.filter(m=>!m.score||!/\d/.test(m.score));
+
+ let summary="";
+ if(standings.length){
+   const leader=standings[0];
+   summary=`${leader.team} staat bovenaan${leader.points?` met ${leader.points} punten`:""}.`;
+   if(standings[1]) summary+=` ${standings[1].team} volgt daarachter.`;
+ }
+ if(upcoming.length){
+   const m=upcoming[0];
+   summary+=`${summary?" ":""}Eerstvolgende zichtbare wedstrijd: ${m.home} – ${m.away}${m.date?` op ${m.date}`:""}${m.time?` om ${m.time}`:""}.`;
+ }
+ if(!summary) summary="De poule is gevonden. Open Handbal.nl voor de volledige officiële gegevens.";
+
+ return {
+   title,
+   summary,
+   standings,
+   recentResults:played.slice(0,3),
+   upcoming:upcoming.slice(0,3),
+   updated:new Date().toISOString()
+ };
 }
+
 async function refreshPool(p){
  try{
    const data=await fetchPoolSummary(p.url);
@@ -193,11 +286,79 @@ async function refreshPool(p){
    localStorage.setItem("hh61_pools",JSON.stringify(pools));
  }catch{p.status="fail"}
 }
-async function renderPools(refresh=False){
+
+async function renderPools(refresh=false){
  $("#poolCount").textContent=`${pools.length} gevolgd`;
- if(!pools.length){$("#poolList").innerHTML=`<div class="empty">Nog geen eigen poules toegevoegd.</div>`;return}
- if(refresh)await Promise.all(pools.map(refreshPool));
- $("#poolList").innerHTML=pools.map((p,i)=>`<article class="card pool-card"><div class="head"><div class="src"><span class="avatar">🏆</span><span><b>${esc(p.title||"Mijn poule")}</b><small>${p.updated?`Bijgewerkt ${fmt(p.updated)}`:"Nog niet bijgewerkt"}</small></span></div><span class="tag">${p.status==="ok"?"Actueel":"Poule"}</span></div><div class="pool-summary">${esc(p.summary||"Tik op verversen om een samenvatting van deze Handbal.nl-poule te maken.")}</div>${(p.rows||[]).length?`<div class="pool-lines">${p.rows.map(r=>`<div class="pool-line"><span>${esc(r)}</span></div>`).join("")}</div>`:""}<div class="card-actions"><a href="${esc(p.url)}" target="_blank">Open op Handbal.nl →</a><button data-remove-pool="${i}">Verwijder</button></div></article>`).join("");
+ if(!pools.length){
+   $("#poolList").innerHTML=`<div class="empty">Nog geen eigen poules toegevoegd.</div>`;
+   return;
+ }
+ if(refresh) await Promise.all(pools.map(refreshPool));
+
+ $("#poolList").innerHTML=pools.map((p,i)=>{
+   const standingRows=(p.standings||[]).slice(0,5).map(s=>`
+     <div class="stand-row">
+       <span class="pos">${esc(s.pos||"")}</span>
+       <span class="team">${esc(s.team)}</span>
+       <span class="played">${esc(s.played||"")}</span>
+       <strong>${esc(s.points||"")}</strong>
+     </div>`).join("");
+
+   const upcoming=(p.upcoming||[]).slice(0,3).map(m=>`
+     <div class="match-row">
+       <span>${esc([m.date,m.time].filter(Boolean).join(" "))}</span>
+       <b>${esc(m.home)} – ${esc(m.away)}</b>
+     </div>`).join("");
+
+   const results=(p.recentResults||[]).slice(0,3).map(m=>`
+     <div class="match-row">
+       <span>${esc([m.date,m.time].filter(Boolean).join(" "))}</span>
+       <b>${esc(m.home)} – ${esc(m.away)}</b>
+       <strong>${esc(m.score||"")}</strong>
+     </div>`).join("");
+
+   return `<article class="card pool-card">
+     <div class="head">
+       <div class="src">
+         <span class="avatar">🏆</span>
+         <span>
+           <b>${esc(p.title||"Mijn competitie")}</b>
+           <small>${p.updated?`Bijgewerkt ${fmt(p.updated)}`:"Nog niet bijgewerkt"}</small>
+         </span>
+       </div>
+       <span class="tag">${p.status==="ok"?"Actueel":"Poule"}</span>
+     </div>
+
+     <div class="pool-summary">${esc(p.summary||"")}</div>
+
+     ${standingRows?`
+       <div class="pool-block">
+         <div class="pool-block-title">Stand</div>
+         <div class="stand-head"><span>#</span><span>Team</span><span>GS</span><span>PT</span></div>
+         ${standingRows}
+       </div>`:""}
+
+     ${upcoming?`
+       <div class="pool-block">
+         <div class="pool-block-title">Komende wedstrijden</div>
+         ${upcoming}
+       </div>`:""}
+
+     ${results?`
+       <div class="pool-block">
+         <div class="pool-block-title">Laatste uitslagen</div>
+         ${results}
+       </div>`:""}
+
+     ${!standingRows&&!upcoming&&!results?`
+       <div class="empty compact">De officiële pagina is gevonden, maar de stand of wedstrijden konden niet betrouwbaar worden uitgelezen.</div>`:""}
+
+     <div class="card-actions">
+       <a href="${esc(p.url)}" target="_blank">Open op Handbal.nl →</a>
+       <button data-remove-pool="${i}">Verwijder</button>
+     </div>
+   </article>`;
+ }).join("");
 }
 
 async function loadNews(){
