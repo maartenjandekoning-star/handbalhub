@@ -405,7 +405,21 @@ function dedupe(arr){
  return [...map.values()].sort((a,b)=>(hasReliableDate(b)-hasReliableDate(a))||((new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)));
 }
 function card(x){
- return`<article class="card"><div class="head"><div class="src"><span class="avatar">${esc(avatar(x.source))}</span><span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span></div><span class="tag">${esc(x.category)}</span></div><h2>${esc(x.title)}</h2>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}<div class="card-actions"></div></article>`
+ const url=esc(x.url||"#");
+ return`<article class="card" data-article-url="${url}">
+   <div class="head">
+     <div class="src">
+       <span class="avatar">${esc(avatar(x.source))}</span>
+       <span><b>${esc(x.source)}</b><small>${fmt(x.date)}</small></span>
+     </div>
+     <span class="tag">${esc(x.category)}</span>
+   </div>
+   <h2 class="news-title">
+     <a class="article-title-link" href="${url}" target="_blank" rel="noopener">${esc(x.title)}</a>
+   </h2>
+   ${x.summary?`<p>${esc(x.summary)}</p>`:""}
+   ${x.image?`<a class="article-image-link" href="${url}" target="_blank" rel="noopener"><img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.closest('a')?.remove()"></a>`:""}
+ </article>`
 }
 
 function normalizeTopicText(value=""){
@@ -912,92 +926,3 @@ document.addEventListener("click",async e=>{
  }
 });
 
-/* v7.6: news title/photo opens article; separate Open article CTA removed visually */
-document.addEventListener("click", e => {
-  const target = e.target.closest(".article-title-link,.article-image-link,[data-news-title],[data-news-image]");
-  if (!target) return;
-  const href = target.getAttribute("href");
-  if (href && href !== "#") return; // normal anchor behavior
-  const card = target.closest(".news-card,.card,article");
-  const link = card?.querySelector('a[href]:not([href="#"])');
-  if (link) {
-    e.preventDefault();
-    window.open(link.href, "_blank", "noopener");
-  }
-});
-
-function enhanceNewsArticleCards(){
-  document.querySelectorAll(".news-card,.card,article").forEach(card=>{
-    const links=[...card.querySelectorAll("a[href]")];
-    const legacy=links.find(a=>/^\s*open artikel\s*(?:→|↗)?\s*$/i.test(a.textContent||""));
-    if(!legacy)return;
-    const href=legacy.href;
-    const title=card.querySelector("h1,h2,h3,.title,.news-title");
-    if(title && !title.closest("a") && !title.querySelector("a")){
-      const a=document.createElement("a");
-      a.href=href; a.target="_blank"; a.rel="noopener"; a.className="article-title-link";
-      title.parentNode.insertBefore(a,title); a.appendChild(title);
-    }
-    const img=card.querySelector("img");
-    if(img && !img.closest("a")){
-      const a=document.createElement("a");
-      a.href=href; a.target="_blank"; a.rel="noopener"; a.className="article-image-link";
-      img.parentNode.insertBefore(a,img); a.appendChild(img);
-    }
-    legacy.remove();
-  });
-}
-const hhNewsObserver=new MutationObserver(enhanceNewsArticleCards);
-hhNewsObserver.observe(document.documentElement,{childList:true,subtree:true});
-document.addEventListener("DOMContentLoaded",enhanceNewsArticleCards);
-setTimeout(enhanceNewsArticleCards,500);
-
-/* v7.7: reliable article links */
-function wireArticleCards(){
-  document.querySelectorAll(".news-card,.card,article").forEach(card=>{
-    let url = card.dataset.articleUrl || card.dataset.url || "";
-
-    const anchors=[...card.querySelectorAll("a[href]")];
-    const legacy=anchors.find(a=>/open artikel/i.test(a.textContent||""));
-    if(!url && legacy) url=legacy.href;
-
-    // Also use an existing genuine article link in the card.
-    if(!url){
-      const genuine=anchors.find(a=>{
-        const h=a.getAttribute("href")||"";
-        return /^https?:/i.test(h) && !/javascript:/i.test(h);
-      });
-      if(genuine) url=genuine.href;
-    }
-    if(!url) return;
-
-    card.dataset.articleUrl=url;
-
-    const title=card.querySelector(".news-title,h1,h2,h3,.title");
-    if(title){
-      title.style.cursor="pointer";
-      title.setAttribute("role","link");
-      title.onclick=(ev)=>{
-        ev.preventDefault(); ev.stopPropagation();
-        window.location.href=url;
-      };
-    }
-
-    const img=card.querySelector("img");
-    if(img){
-      img.style.cursor="pointer";
-      img.onclick=(ev)=>{
-        ev.preventDefault(); ev.stopPropagation();
-        window.location.href=url;
-      };
-    }
-
-    // Remove old CTA only after its URL has been captured.
-    if(legacy) legacy.remove();
-  });
-}
-const hh77Observer=new MutationObserver(()=>wireArticleCards());
-hh77Observer.observe(document.body||document.documentElement,{childList:true,subtree:true});
-document.addEventListener("DOMContentLoaded",wireArticleCards);
-setTimeout(wireArticleCards,250);
-setTimeout(wireArticleCards,1000);
