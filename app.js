@@ -418,78 +418,24 @@ async function refreshPool(p){
  }catch{p.status="fail"}
 }
 
-async function renderPools(refresh=false){
- $("#poolCount").textContent=`${pools.length} gevolgd`;
+async function renderPools(){
+ const box=$("#poolList");
+ if(!box)return;
  if(!pools.length){
-   $("#poolList").innerHTML=`<div class="empty">Nog geen eigen poules toegevoegd.</div>`;
+   box.innerHTML='<div class="empty-compact">Nog geen competities toegevoegd.</div>';
    return;
  }
- if(refresh) await Promise.all(pools.map(refreshPool));
-
- $("#poolList").innerHTML=pools.map((p,i)=>{
-   const standingRows=(p.standings||[]).slice(0,5).map(s=>`
-     <div class="stand-row">
-       <span class="pos">${esc(s.pos||"")}</span>
-       <span class="team">${esc(s.team)}</span>
-       <span class="played">${esc(s.played||"")}</span>
-       <strong>${esc(s.points||"")}</strong>
-     </div>`).join("");
-
-   const upcoming=(p.upcoming||[]).slice(0,3).map(m=>`
-     <div class="match-row">
-       <span>${esc([m.date,m.time].filter(Boolean).join(" "))}</span>
-       <b>${esc(m.home)} – ${esc(m.away)}</b>
-     </div>`).join("");
-
-   const results=(p.recentResults||[]).slice(0,3).map(m=>`
-     <div class="match-row">
-       <span>${esc([m.date,m.time].filter(Boolean).join(" "))}</span>
-       <b>${esc(m.home)} – ${esc(m.away)}</b>
-       <strong>${esc(m.score||"")}</strong>
-     </div>`).join("");
-
-   return `<article class="card pool-card">
-     <div class="head">
-       <div class="src">
-         <span class="avatar">🏆</span>
-         <span>
-           <b>${esc(p.title||"Mijn competitie")}</b>
-           <small>${p.updated?`Bijgewerkt ${fmt(p.updated)}`:"Nog niet bijgewerkt"}</small>
-         </span>
-       </div>
-       <span class="tag">${p.status==="ok"?"Actueel":"Poule"}</span>
+ box.innerHTML=pools.map((p,i)=>`
+   <article class="pool-compact">
+     <div class="pool-compact-icon">🏆</div>
+     <div class="pool-compact-main">
+       <strong>${esc(p.manualTitle||p.title||"Mijn competitie")}</strong>
+       <span>Handbal.nl</span>
      </div>
-
-     <div class="pool-summary">${esc(p.summary||"")}</div>
-
-     ${standingRows?`
-       <div class="pool-block">
-         <div class="pool-block-title">Stand</div>
-         <div class="stand-head"><span>#</span><span>Team</span><span>GS</span><span>PT</span></div>
-         ${standingRows}
-       </div>`:""}
-
-     ${upcoming?`
-       <div class="pool-block">
-         <div class="pool-block-title">Komende wedstrijden</div>
-         ${upcoming}
-       </div>`:""}
-
-     ${results?`
-       <div class="pool-block">
-         <div class="pool-block-title">Laatste uitslagen</div>
-         ${results}
-       </div>`:""}
-
-     ${!standingRows&&!upcoming&&!results?`
-       <div class="empty compact">De officiële pagina is gevonden, maar de stand of wedstrijden konden niet betrouwbaar worden uitgelezen.</div>`:""}
-
-     <div class="card-actions">
-       <a href="${esc(p.url)}" target="_blank">Open op Handbal.nl →</a>
-       <div><button data-rename-pool="${i}">Naam wijzigen</button><button data-remove-pool="${i}">Verwijder</button></div>
-     </div>
-   </article>`;
- }).join("");
+     <a class="pool-open" href="${esc(p.url)}" target="_blank" rel="noopener">Bekijk poule ↗</a>
+     <button class="pool-more" data-pool-more="${i}" aria-label="Meer opties">•••</button>
+   </article>
+ `).join("");
 }
 
 async function loadNews(){
@@ -553,3 +499,29 @@ new IntersectionObserver(es=>{if(es[0].isIntersecting){olderVisible+=25;renderNe
 loadNews();
 renderPools(false);
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+
+
+document.addEventListener("click",e=>{
+ const more=e.target.closest("[data-pool-more]");
+ if(!more)return;
+ const i=Number(more.dataset.poolMore), p=pools[i];
+ if(!p)return;
+ const choice=prompt("Kies een actie:\n1 = Naam wijzigen\n2 = Verwijderen","1");
+ if(choice==="1"){
+   const name=prompt("Naam van competitie of poule:",p.manualTitle||p.title||"");
+   if(name&&name.trim()){
+     p.manualTitle=name.trim();p.title=name.trim();
+     localStorage.setItem("hh61_pools",JSON.stringify(pools));
+     renderPools();
+   }
+ }else if(choice==="2"){
+   if(confirm(`"${p.manualTitle||p.title||"Deze competitie"}" verwijderen?`)){
+     pools.splice(i,1);
+     localStorage.setItem("hh61_pools",JSON.stringify(pools));
+     renderPools();
+   }
+ }
+});
+
+const addPoolBtn2=document.querySelector("#addPoolBtn2");
+if(addPoolBtn2)addPoolBtn2.onclick=()=>{document.querySelector("#poolForm").hidden=false;document.querySelector("#poolName")?.focus();};

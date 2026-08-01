@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=6.5">
+<link rel="stylesheet" href="styles.css?v=6.6">
 <title>HandbalHub</title>
 </head>
 <body>
@@ -90,7 +90,11 @@
   </div>
 
   <div class="feed-section">
-    <div class="feed-title"><span>MIJN COMPETITIES</span><small id="poolCount"></small></div>
+    <div class="feed-title"><div class="competition-toolbar">
+<button id="addPoolBtn2" class="primary-compact">＋ Competitie toevoegen</button>
+<a class="secondary-compact" href="https://www.handbal.nl/competitie/" target="_blank" rel="noopener">Alle competities ↗</a>
+</div>
+<span>MIJN COMPETITIES</span><small id="poolCount"></small></div>
     <div id="poolList" class="timeline"></div>
   </div>
 </section>
@@ -99,9 +103,9 @@
 
 <nav class="nav">
 <button class="active" data-tab="news"><span>▤</span><small>Nieuws</small></button>
-<button data-tab="live"><span>●</span><small>Live</small></button>
 <button data-tab="competitions"><span>🏆</span><small>Competities</small></button>
+<button data-tab="live"><span>●</span><small>Live</small></button>
 </nav>
-<script src="app.js?v=6.5"></script>
+<script src="app.js?v=6.6"></script>
 </body>
 </html>

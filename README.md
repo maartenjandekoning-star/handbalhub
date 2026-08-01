@@ -1,15 +1,9 @@
-# HandbalHub 6.5 – eenvoudiger
+# HandbalHub 6.6
 
-Gerichte vereenvoudiging:
-
-- Handbal Startpunt blijft een vaste bron.
-- De HTML-parser herkent nu ook Nederlandse datums zoals 31 juli 2026 en 31-07-2026.
-- Ontbreekt een betrouwbare datum, dan blijft het artikel onder ouder nieuws staan.
-- Bij het toevoegen van een Handbal.nl-poule zijn naam én link verplicht.
-- De handmatig ingevoerde poulenaam is altijd leidend.
-- Bestaande poules kunnen via 'Naam wijzigen' worden hernoemd.
-- Mijn Hub is verwijderd.
-- Opslaanhartjes zijn verwijderd.
-- Navigatie bestaat nu alleen uit Nieuws, Live en Competities.
-
-De bestaande RSS-engine, nieuws-deduplicatie en datumregels blijven verder intact.
+- Onderste navigatie: Nieuws links, Competities exact in het midden, Live rechts.
+- Competitiescherm vereenvoudigd.
+- Grote Handbal.nl/Mijn poule-blokken vervangen door compacte acties.
+- Gevolgde competities zijn compacte snelkoppelingen.
+- Geen misleidende melding meer dat standen niet konden worden uitgelezen.
+- Per competitie: naam, Handbal.nl, 'Bekijk poule ↗' en compact menu voor hernoemen/verwijderen.
+- Nieuws- en livefunctionaliteit van 6.5 blijft behouden.
