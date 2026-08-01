@@ -1,11 +1,29 @@
 {
-  "updatedAt": "2026-08-01T03:35:00+02:00",
+  "updatedAt": "2026-08-01T04:00:00+02:00",
   "items": [
     {
-      "title": "Super Handball League TV",
+      "id": "live-shltv",
+      "type": "live",
+      "title": "Bekijk livestreams en video via SHL TV",
+      "summary": "Open het officiële live- en videoplatform van de Super Handball League.",
       "source": "SHL TV",
+      "category": "Live",
+      "date": "2026-08-01T03:50:00+02:00",
       "url": "https://superhandballeague.tv/live",
-      "confirmed": true
+      "image": "",
+      "priority": 85
+    },
+    {
+      "id": "live-nos",
+      "type": "live",
+      "title": "Bekijk actuele livestreams bij de NOS",
+      "summary": "NOS toont live sport wanneer handbal op het programma staat.",
+      "source": "NOS",
+      "category": "Live",
+      "date": "2026-08-01T03:49:00+02:00",
+      "url": "https://nos.nl/live",
+      "image": "",
+      "priority": 80
     }
   ]
 }

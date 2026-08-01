@@ -1,0 +1,76 @@
+{
+  "news": [
+    {
+      "id": "handbalnl",
+      "name": "Handbal.nl",
+      "feed": "https://handbal.nl/feed/",
+      "home": "https://handbal.nl/"
+    },
+    {
+      "id": "inside",
+      "name": "Handbal Inside",
+      "feed": "https://www.handbalinside.nl/feed/",
+      "home": "https://www.handbalinside.nl/"
+    },
+    {
+      "id": "startpunt",
+      "name": "Handbal Startpunt",
+      "feed": "https://www.handbalstartpunt.nl/feed/",
+      "home": "https://www.handbalstartpunt.nl/"
+    },
+    {
+      "id": "shl",
+      "name": "Super Handball League",
+      "feed": "https://superhandballeague.com/feed/",
+      "home": "https://superhandballeague.com/"
+    },
+    {
+      "id": "oost",
+      "name": "HandbalOost",
+      "feed": "https://handbaloost.nl/feed/",
+      "home": "https://handbaloost.nl/"
+    },
+    {
+      "id": "groothellevoet",
+      "name": "Groot Hellevoet",
+      "feed": "https://groothellevoet.nl/feed/",
+      "home": "https://groothellevoet.nl/"
+    },
+    {
+      "id": "ehf",
+      "name": "EHF",
+      "feed": "https://www.eurohandball.com/en/rss/",
+      "home": "https://www.eurohandball.com/"
+    },
+    {
+      "id": "ihf",
+      "name": "IHF",
+      "feed": "https://www.ihf.info/rss.xml",
+      "home": "https://www.ihf.info/"
+    },
+    {
+      "id": "teamnl",
+      "name": "TeamNL",
+      "feed": "https://www.teamnl.org/rss",
+      "home": "https://www.teamnl.org/"
+    }
+  ],
+  "googleNewsQueries": [
+    {
+      "name": "NOS Sport",
+      "query": "site:nos.nl handbal"
+    },
+    {
+      "name": "NU.nl Sport",
+      "query": "site:nu.nl handbal"
+    },
+    {
+      "name": "Google Nieuws",
+      "query": "Nederlands handbal"
+    },
+    {
+      "name": "Google Nieuws regionaal",
+      "query": "handbal Nederland club"
+    }
+  ]
+}

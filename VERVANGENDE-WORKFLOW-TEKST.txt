@@ -1,40 +1,30 @@
 name: Update HandbalHub nieuws
-
 on:
   workflow_dispatch:
   schedule:
     - cron: "17 */6 * * *"
   push:
     paths:
-      - "update-news-rss.mjs"
+      - "update-news.mjs"
+      - "sources.json"
       - "package.json"
       - ".github/workflows/main.yml"
-
 permissions:
   contents: write
-
 concurrency:
   group: handbalhub-news
   cancel-in-progress: true
-
 jobs:
-  update-news:
+  update:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
-
+    timeout-minutes: 4
     steps:
-      - name: Repository ophalen
-        uses: actions/checkout@v4
-
-      - name: Node.js instellen
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
-
-      - name: Nieuws via RSS ophalen
-        run: npm run update:news
-
-      - name: Alleen een geldige update opslaan
+      - run: npm run update:news
+      - name: Geldige nieuwsupdate opslaan
         run: |
           git config user.name "HandbalHub Bot"
           git config user.email "actions@users.noreply.github.com"

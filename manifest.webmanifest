@@ -1,11 +1,10 @@
 {
   "name": "HandbalHub Nederland",
   "short_name": "HandbalHub",
-  "description": "Het laatste Nederlandse handbalnieuws, livevideo en competities.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#051a35",
-  "theme_color": "#051a35",
+  "background_color": "#06192f",
+  "theme_color": "#06192f",
   "icons": [
     {
       "src": "icon-192.png",
