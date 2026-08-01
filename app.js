@@ -53,8 +53,112 @@ function category(t=""){
 function excluded(title=""){return /privacy|cookie|algemene voorwaarden|contact|over ons|disclaimer|vacature|adverteren|nieuwsbrief/i.test(title)}
 function avatar(s){return(s||"HH").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}
 function imageFromHtml(html=""){const m=html.match(/<img[^>]+(?:src|data-src)=["']([^"']+)/i);return m?.[1]||""}
+
+function xmlMediaImage(node){
+ if(!node)return "";
+ const children=[...node.getElementsByTagName("*")];
+ for(const el of children){
+   const local=(el.localName||el.nodeName||"").toLowerCase();
+   if(local==="thumbnail"||local==="content"){
+     const u=el.getAttribute?.("url")||el.getAttribute?.("src")||"";
+     const type=(el.getAttribute?.("type")||"").toLowerCase();
+     if(u && (!type || type.startsWith("image/"))) return u;
+   }
+ }
+ const enclosure=node.querySelector?.("enclosure");
+ if(enclosure){
+   const u=enclosure.getAttribute("url")||"";
+   const type=(enclosure.getAttribute("type")||"").toLowerCase();
+   if(u && (!type || type.startsWith("image/"))) return u;
+ }
+ return "";
+}
+
+function validImageUrl(url=""){
+ if(!url)return "";
+ try{
+   const u=new URL(url,location.href);
+   if(!/^https?:$/.test(u.protocol))return "";
+   return u.href;
+ }catch{return ""}
+}
+
+const IMAGE_CACHE_KEY="hh70_image_cache";
+let imageCache={};
+try{imageCache=JSON.parse(localStorage.getItem(IMAGE_CACHE_KEY)||"{}")||{}}catch{imageCache={}}
+
+function saveImageCache(){
+ try{localStorage.setItem(IMAGE_CACHE_KEY,JSON.stringify(imageCache))}catch{}
+}
+
+function extractOgImage(html,baseUrl){
+ const doc=new DOMParser().parseFromString(html,"text/html");
+ const candidates=[
+   doc.querySelector('meta[property="og:image"]')?.content,
+   doc.querySelector('meta[property="og:image:secure_url"]')?.content,
+   doc.querySelector('meta[name="twitter:image"]')?.content,
+   doc.querySelector('meta[name="twitter:image:src"]')?.content,
+   doc.querySelector('article img')?.src
+ ].filter(Boolean);
+ for(const raw of candidates){
+   try{
+     const u=new URL(raw,baseUrl).href;
+     if(validImageUrl(u))return u;
+   }catch{}
+ }
+ return "";
+}
+
+async function articleImage(url){
+ if(!url)return "";
+ if(imageCache[url]!==undefined)return imageCache[url]||"";
+ // Google News discovery links are poor candidates for page-image enrichment.
+ if(/news\.google\.com/i.test(url)){imageCache[url]="";return ""}
+ for(const proxy of [ALLORIGINS,CORSPROXY]){
+   try{
+     const html=await proxyText(url,proxy);
+     const img=extractOgImage(html,url);
+     if(img){
+       imageCache[url]=img;saveImageCache();return img;
+     }
+   }catch{}
+ }
+ imageCache[url]="";saveImageCache();return "";
+}
+
+async function enrichRecentImages(){
+ const targets=items
+   .filter(x=>!x.image&&x.url&&hasReliableDate(x))
+   .sort((a,b)=>new Date(b.date)-new Date(a.date))
+   .slice(0,24);
+ if(!targets.length)return;
+
+ let changed=false;
+ const queue=targets.slice();
+ async function worker(){
+   while(queue.length){
+     const x=queue.shift();
+     const img=await articleImage(x.url);
+     if(img){x.image=img;changed=true;renderNews()}
+   }
+ }
+ await Promise.all([worker(),worker(),worker()]);
+ if(changed){
+   try{localStorage.setItem("hh61_news",JSON.stringify(items))}catch{}
+ }
+}
+
 function normalize(it,source){
- let image=it.thumbnail||it.enclosure?.link||it.enclosure?.thumbnail||imageFromHtml(it.description||it.content||"");
+ let image=
+   it.thumbnail||
+   it.image||
+   it.enclosure?.link||
+   it.enclosure?.url||
+   it.enclosure?.thumbnail||
+   it.media?.thumbnail||
+   it.media?.content||
+   imageFromHtml(it.description||it.content||"");
+ image=validImageUrl(image);
  let title=strip(it.title),summary=strip(it.description||it.content).slice(0,300);
  return {title,summary,source,category:category(title+" "+summary),date:validNewsDate(it.pubDate||it.published||it.updated||it["dc:date"]||it.date),url:it.link||it.url,image};
 }
@@ -69,7 +173,7 @@ function parseXml(xml,source){
  const doc=new DOMParser().parseFromString(xml,"text/xml");
  return [...doc.querySelectorAll("item")].map(n=>{
    const get=t=>n.querySelector(t)?.textContent?.trim()||"";
-   return normalize({title:get("title"),link:get("link"),pubDate:get("pubDate")||get("published")||get("updated")||get("dc\\:date"),description:get("description"),content:get("content\\:encoded")},source);
+   return normalize({title:get("title"),link:get("link"),pubDate:get("pubDate")||get("published")||get("updated")||get("dc\\:date"),description:get("description"),content:get("content\\:encoded"),image:xmlMediaImage(n)},source);
  }).filter(x=>x.title&&x.url&&!excluded(x.title));
 }
 async function proxyText(url,proxy){
@@ -457,6 +561,7 @@ async function loadNews(){
    localStorage.setItem("hh61_news",JSON.stringify(items));
  }
  renderNews();renderLive();
+ enrichRecentImages().catch(()=>{});
 }
 function showTab(tab){
  currentTab=tab;
