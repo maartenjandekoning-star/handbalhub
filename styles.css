@@ -192,3 +192,45 @@
   display:block;
   width:100%;
 }
+
+.article-image-link.media-slot{
+  position:relative;
+  display:block;
+  width:100%;
+  aspect-ratio:16/9;
+  overflow:hidden;
+  border-radius:14px;
+  background:#0d2037;
+  margin-top:10px;
+}
+.article-image-link.media-slot .media-skeleton{
+  position:absolute;
+  inset:0;
+  display:block;
+  background:linear-gradient(90deg,#10253f 0%,#18324f 50%,#10253f 100%);
+  background-size:200% 100%;
+  animation:hh80-shimmer 1.4s linear infinite;
+  opacity:.72;
+  transition:opacity .2s ease;
+}
+.article-image-link.media-slot img{
+  position:absolute;
+  inset:0;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover;
+  margin:0!important;
+  opacity:0;
+  transition:opacity .22s ease;
+}
+.article-image-link.media-slot.is-loaded img{opacity:1}
+.article-image-link.media-slot.is-loaded .media-skeleton{
+  opacity:0;
+  animation:none;
+  pointer-events:none;
+}
+@keyframes hh80-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){
+  .article-image-link.media-slot .media-skeleton{animation:none}
+  .article-image-link.media-slot img{transition:none}
+}

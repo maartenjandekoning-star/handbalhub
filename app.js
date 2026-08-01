@@ -418,7 +418,12 @@ function card(x){
      <a class="article-title-link" href="${url}" target="_blank" rel="noopener">${esc(x.title)}</a>
    </h2>
    ${x.summary?`<p>${esc(x.summary)}</p>`:""}
-   ${x.image?`<a class="article-image-link" href="${url}" target="_blank" rel="noopener"><img src="${esc(x.image)}" alt="" loading="lazy" onerror="this.closest('a')?.remove()"></a>`:""}
+   ${x.image?`<a class="article-image-link media-slot" href="${url}" target="_blank" rel="noopener">
+  <span class="media-skeleton" aria-hidden="true"></span>
+  <img src="${esc(x.image)}" alt="" loading="lazy" decoding="async"
+       onload="this.closest('.media-slot')?.classList.add('is-loaded')"
+       onerror="this.closest('.media-slot')?.remove()">
+</a>`:""}
  </article>`
 }
 
@@ -926,3 +931,24 @@ document.addEventListener("click",async e=>{
  }
 });
 
+
+function stabilizeNewsImages(){
+  document.querySelectorAll(".article-image-link").forEach(link=>{
+    link.classList.add("media-slot");
+    if(!link.querySelector(".media-skeleton")){
+      const sk=document.createElement("span");
+      sk.className="media-skeleton";
+      sk.setAttribute("aria-hidden","true");
+      link.insertBefore(sk,link.firstChild);
+    }
+    const img=link.querySelector("img");
+    if(!img)return;
+    img.decoding="async";
+    if(img.complete && img.naturalWidth>0)link.classList.add("is-loaded");
+    img.addEventListener("load",()=>link.classList.add("is-loaded"),{once:true});
+    img.addEventListener("error",()=>link.remove(),{once:true});
+  });
+}
+new MutationObserver(stabilizeNewsImages).observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener("DOMContentLoaded",stabilizeNewsImages);
+setTimeout(stabilizeNewsImages,200);
