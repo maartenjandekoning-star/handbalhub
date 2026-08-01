@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=6.0">
+<link rel="stylesheet" href="styles.css?v=6.1">
 <title>HandbalHub</title>
 </head>
 <body>
@@ -20,29 +20,92 @@
 <div class="searchbar" id="searchbar" hidden><input id="searchInput" placeholder="Zoek club, speler, bron of onderwerp"></div>
 
 <main>
-<section id="newsView">
+<section id="newsView" class="view active">
   <article class="today">
-    <small>📰 IN HET NIEUWS VANDAAG</small>
+    <div class="section-head">
+      <div><small>📰 VOOR JOU</small><h1>In het nieuws vandaag</h1></div>
+      <span id="todayHint">persoonlijke selectie</span>
+    </div>
     <div id="today"></div>
   </article>
+
   <div class="source-status" id="sourceStatus"></div>
   <div class="chips" id="chips"></div>
-  <div class="timeline" id="timeline"></div>
-  <div id="sentinel"></div>
+
+  <div class="feed-section">
+    <div class="feed-title"><span>LAATSTE 7 DAGEN</span><small id="recentCount"></small></div>
+    <div class="timeline" id="recentTimeline"></div>
+  </div>
+
+  <div class="feed-section older-section">
+    <div class="feed-title"><span>OUDER NIEUWS</span><small id="olderCount"></small></div>
+    <div class="timeline" id="olderTimeline"></div>
+    <div id="sentinel"></div>
+  </div>
 </section>
-<section id="savedView" hidden>
-  <div class="page-title"><small>★ MIJN HUB</small><h1>Opgeslagen</h1></div>
+
+<section id="liveView" class="view">
+  <div class="page-title"><small>🔴 LIVE & VIDEO</small><h1>Handbal kijken</h1></div>
+  <div class="provider-grid">
+    <a class="provider-card" href="https://superhandballeague.tv/live" target="_blank">
+      <b>SHL TV</b><span>Livestreams & samenvattingen</span><strong>Open SHL TV →</strong>
+    </a>
+    <a class="provider-card" href="https://nos.nl/live" target="_blank">
+      <b>NOS</b><span>Live sport & uitzendingen</span><strong>Open NOS →</strong>
+    </a>
+  </div>
+
+  <div class="feed-section">
+    <div class="feed-title"><span>NU / STRAKS LIVE</span><small id="liveNowCount"></small></div>
+    <div class="timeline" id="liveNow"></div>
+  </div>
+
+  <div class="feed-section">
+    <div class="feed-title"><span>AANKOMENDE LIVESTREAMS</span><small id="liveUpcomingCount"></small></div>
+    <div class="timeline" id="liveUpcoming"></div>
+  </div>
+</section>
+
+<section id="competitionsView" class="view">
+  <div class="page-title"><small>🏆 COMPETITIES</small><h1>Programma, uitslagen & standen</h1></div>
+
+  <div class="provider-grid">
+    <a class="provider-card" href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">
+      <b>Handbal.nl</b><span>Alle officiële competitiegegevens</span><strong>Open Handbal.nl →</strong>
+    </a>
+    <button class="provider-card button-card" id="addPoolBtn">
+      <b>Mijn poule</b><span>Voeg een specifieke Handbal.nl-poule toe</span><strong>+ Poule toevoegen</strong>
+    </button>
+  </div>
+
+  <div id="poolForm" class="pool-form" hidden>
+    <label for="poolUrl">Plak de directe URL van de poule op Handbal.nl</label>
+    <input id="poolUrl" type="url" placeholder="https://handbal.nl/..." inputmode="url">
+    <div class="row-actions">
+      <button class="primary" id="savePoolBtn">Toevoegen</button>
+      <button class="secondary" id="cancelPoolBtn">Annuleren</button>
+    </div>
+  </div>
+
+  <div class="feed-section">
+    <div class="feed-title"><span>MIJN COMPETITIES</span><small id="poolCount"></small></div>
+    <div id="poolList" class="timeline"></div>
+  </div>
+</section>
+
+<section id="savedView" class="view">
+  <div class="page-title"><small>★ MIJN HUB</small><h1>Opgeslagen nieuws</h1></div>
   <div class="timeline" id="savedTimeline"></div>
 </section>
 </main>
 </div>
 
 <nav class="nav">
-<button class="active" data-tab="news">▤<small>Nieuws</small></button>
-<a href="https://superhandballeague.tv/live" target="_blank">●<small>Live</small></a>
-<a href="https://handbal.nl/programma-uitslagen-standen/" target="_blank">🏆<small>Competities</small></a>
-<button data-tab="saved">★<small>Mijn Hub</small></button>
+<button class="active" data-tab="news"><span>▤</span><small>Nieuws</small></button>
+<button data-tab="live"><span>●</span><small>Live</small></button>
+<button data-tab="competitions"><span>🏆</span><small>Competities</small></button>
+<button data-tab="saved"><span>★</span><small>Mijn Hub</small></button>
 </nav>
-<script src="app.js?v=6.0"></script>
+<script src="app.js?v=6.1"></script>
 </body>
 </html>

@@ -1,30 +1,21 @@
-# HandbalHub 6.0 – V8 nieuwsengine
+# HandbalHub 6.1
 
-Dit is bewust weer de eenvoudige architectuur van de oude goedwerkende versies.
+Gebouwd op de eenvoudige en werkende V8 RSS-engine.
 
-## Kernbestanden
-- index.html
-- styles.css
-- app.js
-- manifest.webmanifest
-- service-worker.js
+Nieuw:
+- TeamNL-categorisering veel strenger.
+- Privacy/cookie/contactpagina's uit de feed gefilterd.
+- Nieuws chronologisch gesplitst in Laatste 7 dagen en Ouder nieuws.
+- In het nieuws vandaag is een lokale persoonlijke selectie op basis van klikgedrag, actualiteit en spreiding.
+- Live is een eigen HandbalHub-tab met SHL TV en NOS en gevonden live/aankomende streamberichten.
+- Competities is een eigen tab met Handbal.nl en eigen poule-URL's.
+- Eigen poules worden lokaal opgeslagen en op verzoek via dezelfde eenvoudige proxytechniek samengevat.
 
-Daarnaast alleen de twee PWA-iconen.
-
-## Nieuwsengine
-Per RSS-bron probeert de app:
-1. RSS2JSON
-2. AllOrigins
-3. CorsProxy
-
-Handbal Startpunt krijgt een aparte HTML-uitlezer via dezelfde proxyfallbacks.
-
-De laatste succesvolle feed wordt in localStorage opgeslagen. De ingebouwde noodfeed is altijd direct zichtbaar.
-
-Geen GitHub Actions.
-Geen Node.
-Geen Playwright.
-Geen news.json.
-Geen submappen nodig.
+Nog steeds:
+- geen GitHub Actions
+- geen Node
+- geen Playwright
+- geen news.json
+- geen submappen nodig
 
 Upload alle bestanden rechtstreeks naar de hoofdmap van GitHub Pages.
